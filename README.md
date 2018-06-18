@@ -1,2 +1,4 @@
 # formx
-Form worker
+
+- [ ] Validate one field
+- [ ] Async validation

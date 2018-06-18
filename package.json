@@ -1,0 +1,31 @@
+{
+  "name": "formx",
+  "version": "1.0.0",
+  "author": "Pavel Ivanov",
+  "description": "Form worker",
+  "homepage": "https://github.com/pavelivanov/formx#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pavelivanov/formx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pavelivanov/formx/issues"
+  },
+  "keywords": [
+    "form",
+    "formjs",
+    "vanilla",
+    "reactive"
+  ],
+  "license": "ISC",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha ./test/*.spec.js --require ./test/_bootstrap.js"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0"
+  }
+}
