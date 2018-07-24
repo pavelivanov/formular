@@ -1,7 +1,7 @@
 # formx
 
-- [ ] Pass initial values in options
-- [ ] Set initial values
+- [x] Pass initial values in options
+- [x] Set initial values
 - [ ] Reset form to default state / options / etc
 - [x] Validate form
 - [x] Validate one field
