@@ -56,8 +56,8 @@ class Form {
     return errors
   }
 
-  validate() {
-    this.isValid = this.fields.validate()
+  async validate() {
+    this.isValid = await this.fields.validate()
 
     return this.isValid
   }

@@ -7,4 +7,4 @@
 - [x] Validate one field
 - [x] Group forms to one container (group)
 - [x] Validate forms group
-- [ ] Async validation
+- [x] Async validation

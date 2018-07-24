@@ -1,3 +1,19 @@
+const asyncSome = async (arr, calle) => {
+  if (arr.length) {
+    const item = arr.shift()
+    const isMatch = await calle(item)
+
+    if (isMatch) {
+      return true
+    }
+
+    return asyncSome(arr, calle)
+  }
+
+  return false
+}
+
+
 class Field {
 
   /**
@@ -15,12 +31,12 @@ class Field {
     this._validators = options.validate || options
   }
 
-  validate() {
+  async validate() {
     let error
 
     if (this._validators && this._validators.length) {
-      this._validators.some((validator) => {
-        error = validator(this.value)
+      await asyncSome(this._validators, async (validator) => {
+        error = await validator(this.value)
 
         // console.log('')
         // console.log('validator:', validator.name)

@@ -28,3 +28,23 @@ export const streetAddress = (value) => {
     return 'Must be a valid street address'
   }
 }
+
+export const successAsyncValidation = async (value) => {
+  const isValid = await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true)
+    }, 1000)
+  })
+
+  return undefined
+}
+
+export const failAsyncValidation = async (value) => {
+  const isValid = await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true)
+    }, 1000)
+  })
+
+  return 'Async validation failed'
+}

@@ -1,6 +1,22 @@
 import Field from './Field'
 
 
+const asyncEvery = async (arr, calle) => {
+  if (arr.length) {
+    const item = arr.shift()
+    const isOk = await calle(item)
+
+    if (isOk) {
+      return asyncEvery(arr, calle)
+    }
+
+    return false
+  }
+
+  return true
+}
+
+
 class Fields {
 
   /**
@@ -37,12 +53,15 @@ class Fields {
     })
   }
 
-  validate() {
-    return Object.keys(this).every((fieldName) => {
-      const error = this[fieldName].validate()
+  async validate() {
+    // TODO rewrite with generators
+    const isValid = asyncEvery(Object.keys(this), async (fieldName) => {
+      const error = await this[fieldName].validate()
 
       return !error
     })
+
+    return isValid
   }
 
   destroy() {
