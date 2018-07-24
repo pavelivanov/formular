@@ -10,8 +10,13 @@ class Form {
    * @param {Function} options.initialValues
    */
   constructor(options) {
-    this.fields         = new Fields(options.fields, options.initialValues)
     this.initialOptions = options
+
+    this.setup(options)
+  }
+
+  setup(options) {
+    this.fields         = new Fields(options.fields, options.initialValues)
     this.isValid        = true
   }
 
@@ -55,6 +60,13 @@ class Form {
     this.isValid = this.fields.validate()
 
     return this.isValid
+  }
+
+  reset() {
+    this.fields.destroy()
+    this.setup(this.initialOptions)
+
+    return this
   }
 }
 

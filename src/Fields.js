@@ -44,6 +44,10 @@ class Fields {
       return !error
     })
   }
+
+  destroy() {
+    // off handlers for form reset
+  }
 }
 
 
