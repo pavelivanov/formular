@@ -1,30 +1,17 @@
 import Fields from './Fields'
-import events from './events'
 
 
 class Formx {
 
   /**
    *
-   * @param options
-   * @param options.fields {object}
-   * @param options.initialValues {function}
+   * @param {Object} options
+   * @param {Object} options.fields
+   * @param {Function} options.initialValues
    */
   constructor(options) {
-    this.fields = this._getFields(options)
+    this.fields = new Fields(options.fields)
     this.isValid = true
-  }
-
-  _getFields(options) {
-    return new Fields(options.fields)
-  }
-
-  updateOptions(options) {
-    this.fields = this._getFields(options)
-  }
-
-  updateFieldValues(values) {
-
   }
 
   validate() {
@@ -33,8 +20,30 @@ class Formx {
     return this.isValid
   }
 
-  on(eventName, handler) {
-    events.subscribe(eventName, handler)
+  getValues() {
+    const fieldNames = Object.keys(this.fields)
+    const values = {}
+
+    fieldNames.forEach((fieldName) => {
+      const field = this.fields[fieldName]
+
+      values[fieldName] = field.value
+    })
+
+    return values
+  }
+
+  getErrors() {
+    const fieldNames = Object.keys(this.fields)
+    const errors = {}
+
+    fieldNames.forEach((fieldName) => {
+      const field = this.fields[fieldName]
+
+      errors[fieldName] = field.error
+    })
+
+    return errors
   }
 }
 

@@ -1,8 +1,10 @@
-import events from './events'
-
-
 class Field {
 
+  /**
+   *
+   * @param name
+   * @param {Object|Array} options - can be object options or list of validators
+   */
   constructor(name, options) {
     this.name         = name
     this.value        = options.value === undefined || options.value === null ? '' : options.value
@@ -10,24 +12,23 @@ class Field {
     this.isChanged    = false
     this.isValid      = true
 
-    this._validators = options.validate || []
+    this._validators = options.validate || options
   }
 
   validate() {
     let error
 
     if (this._validators && this._validators.length) {
-      // console.log(`field "${this.name}" validation:`)
-      // console.log('value:', this.value)
+      this._validators.some((validator) => {
+        error = validator(this.value)
+
+        // console.log('')
+        // console.log('validator:', validator.name)
+        // console.log('error:', error)
+
+        return error
+      })
     }
-
-    this._validators.some((validator) => {
-      error = validator(this.value)
-
-      // console.log('')
-      // console.log('validator:', validator.name)
-      // console.log('error:', error)
-    })
 
     this.isValid = !error
     this.error = error
@@ -37,8 +38,6 @@ class Field {
 
   set(value) {
     this.value = value
-
-    events.dispatchEvent('field value change')
   }
 }
 

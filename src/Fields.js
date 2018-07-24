@@ -1,4 +1,3 @@
-import FieldsGroup from './FieldsGroup'
 import Field from './Field'
 
 
@@ -8,7 +7,7 @@ class Fields {
     Object.keys(options).forEach((fieldName) => {
       const opts = options[fieldName]
 
-      this[fieldName] = opts.fields ? new FieldsGroup(fieldName, opts) : new Field(fieldName, opts)
+      this[fieldName] = new Field(fieldName, opts)
     })
   }
 

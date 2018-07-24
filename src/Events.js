@@ -2,7 +2,7 @@ class Event {
 
   /**
    *
-   * @param name {string}
+   * @param {String} name
    */
   constructor(name) {
     this.name = name
@@ -12,7 +12,7 @@ class Event {
   /**
    * Add handler to current Event
    *
-   * @param handler {function}
+   * @param {function} handler
    */
   addHandler(handler) {
     return this.handlers.push(handler)
@@ -21,7 +21,7 @@ class Event {
   /**
    * Call all handlers in all priorities of current Event
    *
-   * @param eventArgs {...array}
+   * @param {...array} eventArgs
    */
   call(...eventArgs) {
     this.handlers.forEach((handler) => handler(...eventArgs))
@@ -35,9 +35,9 @@ class EventAggregator {
   }
 
   /**
-   * Get Event by name
+   * Get event by name
    *
-   * @param name
+   * @param {String} name
    * @returns {*}
    */
   getEvent(name) {
@@ -52,9 +52,10 @@ class EventAggregator {
   }
 
   /**
+   * Dispatch event
    *
-   * @param name {string}
-   * @param eventArgs {...array}
+   * @param {String} name
+   * @param {...array} eventArgs
    */
   dispatchEvent(name, ...eventArgs) {
     const event = this.getEvent(name)
@@ -65,9 +66,10 @@ class EventAggregator {
   }
 
   /**
+   * Add handler
    *
-   * @param name {string}
-   * @param handler {function}
+   * @param {String} name
+   * @param {Function} handler
    * @returns {{ event: *, handler: * }}
    */
   subscribe(name, handler) {

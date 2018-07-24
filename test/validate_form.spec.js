@@ -2,7 +2,7 @@ import { Formx } from './util'
 import { required, streetAddress } from './util/validation'
 
 
-describe('Validating form', () => {
+describe('Form', () => {
 
   let validForm
 
@@ -17,7 +17,7 @@ describe('Validating form', () => {
     })
   })
 
-  it('should be success at start', () => {
+  it('should be valid at start', () => {
 
     const isValid1 = validForm.validate()
 
