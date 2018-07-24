@@ -1,4 +1,4 @@
-class FormxGroup {
+class FormGroup {
 
   /**
    *
@@ -58,4 +58,4 @@ class FormxGroup {
   }
 }
 
-export default FormxGroup
+export default FormGroup

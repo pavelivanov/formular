@@ -33,7 +33,7 @@ class Field {
     this.isValid = !error
     this.error = error
 
-    return this.isValid
+    return error
   }
 
   set(value) {

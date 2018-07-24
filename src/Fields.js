@@ -12,9 +12,11 @@ class Fields {
   }
 
   validate() {
-    return Object.keys(this).every((fieldName) => (
-      this[fieldName].validate()
-    ))
+    return Object.keys(this).every((fieldName) => {
+      const error = this[fieldName].validate()
+
+      return !error
+    })
   }
 }
 

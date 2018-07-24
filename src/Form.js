@@ -1,7 +1,7 @@
 import Fields from './Fields'
 
 
-class Formx {
+class Form {
 
   /**
    *
@@ -48,4 +48,4 @@ class Formx {
 }
 
 
-export default Formx
+export default Form
