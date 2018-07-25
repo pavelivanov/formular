@@ -1,0 +1,20 @@
+{
+  "name": "react-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "rimraf ./node_modules/formx && npx babel ../../src/ --out-dir ./.tmp-formx && mv ./.tmp-formx ./node_modules/formx && react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "1.1.4"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.2"
+  }
+}

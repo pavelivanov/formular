@@ -62,6 +62,20 @@ class Form {
     return this.isValid
   }
 
+  async submit() {
+    const isValid = await this.validate()
+
+    if (!isValid) {
+      const errors = this.getErrors()
+
+      return Promise.reject(errors)
+    }
+
+    const values = this.getValues()
+
+    return values
+  }
+
   reset() {
     this.fields.destroy()
     this.setup(this.initialOptions)
