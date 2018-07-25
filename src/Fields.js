@@ -3,11 +3,11 @@ import Field from './Field'
 
 const asyncEvery = async (arr, calle) => {
   if (arr.length) {
-    const item = arr.shift()
+    const [ item, ...restItems ] = arr
     const isOk = await calle(item)
 
     if (isOk) {
-      return asyncEvery(arr, calle)
+      return asyncEvery(restItems, calle)
     }
 
     return false
@@ -21,10 +21,11 @@ class Fields {
 
   /**
    *
+   * @param {Object} form
    * @param {Object} options
    * @param {Object} initialValues
    */
-  constructor(options, initialValues = {}) {
+  constructor(form, options, initialValues = {}) {
     Object.keys(options).forEach((fieldName) => {
       const opts          = options[fieldName]
       const initialValue  = initialValues[fieldName]
@@ -34,7 +35,7 @@ class Fields {
         opts.value = initialValue
       }
 
-      this[fieldName] = new Field(fieldName, opts)
+      this[fieldName] = new Field(form, fieldName, opts)
     })
   }
 
@@ -42,7 +43,7 @@ class Fields {
    *
    * @param {Object} values
    */
-  setInitialValues(values) {
+  setValues(values) {
     Object.keys(values).forEach((fieldName) => {
       const value = values[fieldName]
       const field = this[fieldName]

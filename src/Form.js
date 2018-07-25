@@ -1,4 +1,5 @@
 import Fields from './Fields'
+import Events from './Events'
 
 
 class Form {
@@ -11,12 +12,13 @@ class Form {
    */
   constructor(options) {
     this.initialOptions = options
+    this.events = new Events()
 
     this.setup(options)
   }
 
   setup(options) {
-    this.fields         = new Fields(options.fields, options.initialValues)
+    this.fields         = new Fields(this, options.fields, options.initialValues)
     this.isValid        = true
   }
 
@@ -27,7 +29,15 @@ class Form {
   setInitialValues(values) {
     this.initialOptions.initialValues = values
 
-    this.fields.setInitialValues(values)
+    this.fields.setValues(values)
+  }
+
+  /**
+   *
+   * @param {Object} values
+   */
+  setValues(values) {
+    this.fields.setValues(values)
   }
 
   getValues() {
@@ -56,6 +66,10 @@ class Form {
     return errors
   }
 
+  triggerChange() {
+    this.events.dispatch('change')
+  }
+
   async validate() {
     this.isValid = await this.fields.validate()
 
@@ -81,6 +95,14 @@ class Form {
     this.setup(this.initialOptions)
 
     return this
+  }
+
+  on(eventName, handler) {
+    this.events.subscribe(eventName, handler)
+  }
+
+  off(eventName, handler) {
+    this.events.unsubscribe(eventName, handler)
   }
 }
 

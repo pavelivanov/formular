@@ -1,16 +1,18 @@
 import React, { Component } from 'react'
 import shippingForm from '../forms/shipping'
+import { Input } from 'formx/react/tags'
 
 
 export default class ShippingForm extends Component {
 
-  reload = () => {
-    this.forceUpdate()
+  componentDidMount() {
+    shippingForm.on('change', () => {
+      this.reload()
+    })
   }
 
-  handleChange = (name, event) => {
-    shippingForm.fields[name].set(event.target.value)
-    this.reload()
+  reload = () => {
+    this.forceUpdate()
   }
 
   handleSubmit = (event) => {
@@ -33,11 +35,7 @@ export default class ShippingForm extends Component {
     return (
       <form className="form" onSubmit={this.handleSubmit}>
         <div className="field">
-          <input
-            placeholder="Address"
-            value={shippingForm.fields.address.value}
-            onChange={this.handleChange.bind(this, 'address')}
-          />
+          <Input field={shippingForm.fields.address} placeholder="Address" />
           {
             Boolean(shippingForm.fields.address.error) && (
               <span className="error">{shippingForm.fields.address.error}</span>
@@ -45,11 +43,12 @@ export default class ShippingForm extends Component {
           }
         </div>
         <div className="field">
-          <input
-            placeholder="Telephone"
-            value={shippingForm.fields.telephone.value}
-            onChange={this.handleChange.bind(this, 'telephone')}
-          />
+          <Input field={shippingForm.fields.telephone} placeholder="Telephone" />
+          {
+            Boolean(shippingForm.fields.telephone.error) && (
+              <span className="error">{shippingForm.fields.telephone.error}</span>
+            )
+          }
         </div>
         <button className="submitButton" type="submit">Submit</button>
       </form>

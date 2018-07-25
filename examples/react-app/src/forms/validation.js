@@ -17,14 +17,7 @@ export const telephone = (value) => {
 // only numbers not available
 // available symbols:  \s  A-Z  a-z  0-9  #  /  -
 export const streetAddress = (value) => {
-  if (
-    !isEmpty(value)
-    && (
-      /^[A-Za-z]+$/.test(value)
-      || /^\d+$/.test(value)
-      || !/^[\sA-Za-z0-9#/-]+$/.test(value)
-    )
-  ) {
+  if (!isEmpty(value) && !(/\d+/.test(value) && /[A-Za-z#/-]+/.test(value))) {
     return 'Must be a valid street address'
   }
 }
