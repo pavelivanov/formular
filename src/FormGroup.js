@@ -56,6 +56,53 @@ class FormGroup {
 
     return values
   }
+
+  // Events ------------------------------------------ /
+
+  /**
+   *
+   * @param {Object} form
+   * @param {function} handler
+   * @returns {function(...[*]): *}
+   */
+  wrapEventHandler(form, handler) {
+    return (...args) => handler({ form, args })
+  }
+
+  /**
+   *
+   * @param {string} eventName
+   * @param {function} handler
+   * @param {Boolean} isOn
+   */
+  toggleSubscribe(eventName, handler, isOn) {
+    const formNames = Object.keys(this.forms)
+
+    formNames.forEach((formName) => {
+      const form = this.forms[formName]
+      const method = isOn ? form.on : form.off
+
+      method.call(form, eventName, this.wrapEventHandler(form, handler))
+    })
+  }
+
+  /**
+   *
+   * @param {string} eventName
+   * @param {function} handler
+   */
+  on(eventName, handler) {
+    this.toggleSubscribe(eventName, handler, true)
+  }
+
+  /**
+   *
+   * @param {string} eventName
+   * @param {function} handler
+   */
+  off(eventName, handler) {
+    this.toggleSubscribe(eventName, handler, false)
+  }
 }
 
 export default FormGroup

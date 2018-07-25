@@ -17,6 +17,7 @@ const Input = (props) => {
   return (
     <input
       {...rest}
+      type="text"
       onChange={async (event) => {
         await field.set(event.target.value)
         field.form.triggerChange()

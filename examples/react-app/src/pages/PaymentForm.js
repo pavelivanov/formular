@@ -1,26 +1,50 @@
 import React, { Component } from 'react'
-import paymentForm from '../forms/payment'
+import { FormxGroup } from 'formx'
+import { shippingForm, billingForm, creditCardForm } from '../forms'
+
+import Field from '../components/Field'
 
 
-console.log(paymentForm)
+const getFormsGroup = (isSameAddress) => {
+  if (isSameAddress) {
+    return new FormxGroup({
+      shipping: shippingForm,
+      creditCard: creditCardForm,
+    })
+  }
+
+  return new FormxGroup({
+    shipping: shippingForm,
+    billing: billingForm,
+    creditCard: creditCardForm,
+  })
+}
+
 
 export default class PaymentForm extends Component {
+
+  componentWillMount() {
+    this.formsGroup = getFormsGroup(false)
+  }
+
+  componentDidMount() {
+    this.formsGroup.on('change', this.reload)
+  }
+
+  componentWillUnmount() {
+    this.formsGroup.off('change', this.reload)
+  }
 
   reload = () => {
     this.forceUpdate()
   }
 
-  handleChange = (formName, fieldName, event) => {
-    paymentForm.forms[formName].fields[fieldName].set(event.target.value)
-    this.reload()
-  }
-
   handleSubmit = (event) => {
     event.preventDefault()
 
-    console.log('values', paymentForm.getValues())
+    console.log('values', this.formsGroup.getValues())
 
-    paymentForm.submit()
+    this.formsGroup.submit()
       .then((values) => {
         console.log('values', values)
         this.reload()
@@ -29,56 +53,31 @@ export default class PaymentForm extends Component {
         this.reload()
       })
   }
+
+  handleChangeSameAddress = (event) => {
+    this.formsGroup = getFormsGroup(event.target.checked)
+    this.reload()
+  }
   
   renderShippingForm() {
     
     return (
       <div className="formSection">
-        <div className="field">
-          <input
-            placeholder="Address"
-            value={paymentForm.forms.shipping.fields.address.value}
-            onChange={this.handleChange.bind(this, 'shipping', 'address')}
-          />
-          {
-            Boolean(paymentForm.forms.shipping.fields.address.error) && (
-              <span className="error">{paymentForm.forms.shipping.fields.address.error}</span>
-            )
-          }
-        </div>
-        <div className="field">
-          <input
-            placeholder="Telephone"
-            value={paymentForm.forms.shipping.fields.telephone.value}
-            onChange={this.handleChange.bind(this, 'shipping', 'telephone')}
-          />
-        </div>
+        <Field field={shippingForm.fields.address} placeholder="Address" />
+        <Field field={shippingForm.fields.telephone} placeholder="Telephone" />
       </div>
     )
   }
   
   renderBillingForm() {
+    if (!this.formsGroup.forms.billing) {
+      return null
+    }
+
     return (
       <div className="formSection">
-        <div className="field">
-          <input
-            placeholder="Address"
-            value={paymentForm.forms.billing.fields.address.value}
-            onChange={this.handleChange.bind(this, 'billing', 'address')}
-          />
-          {
-            Boolean(paymentForm.forms.billing.fields.address.error) && (
-              <span className="error">{paymentForm.forms.billing.fields.address.error}</span>
-            )
-          }
-        </div>
-        <div className="field">
-          <input
-            placeholder="Telephone"
-            value={paymentForm.forms.billing.fields.telephone.value}
-            onChange={this.handleChange.bind(this, 'billing', 'telephone')}
-          />
-        </div>
+        <Field field={billingForm.fields.address} placeholder="Address" />
+        <Field field={billingForm.fields.telephone} placeholder="Telephone" />
       </div>
     )
   }
@@ -87,18 +86,7 @@ export default class PaymentForm extends Component {
 
     return (
       <div className="formSection">
-        <div className="field">
-          <input
-            placeholder="Card Number"
-            value={paymentForm.forms.creditCard.fields.cardNumber.value}
-            onChange={this.handleChange.bind(this, 'creditCard', 'cardNumber')}
-          />
-          {
-            Boolean(paymentForm.forms.creditCard.fields.cardNumber.error) && (
-              <span className="error">{paymentForm.forms.creditCard.fields.cardNumber.error}</span>
-            )
-          }
-        </div>
+        <Field field={creditCardForm.fields.cardNumber} placeholder="Card number" />
       </div>
     )
   }
@@ -108,6 +96,12 @@ export default class PaymentForm extends Component {
     return (
       <form className="form" onSubmit={this.handleSubmit}>
         {this.renderShippingForm()}
+        <div className="formSection">
+          <label>
+            <input type="checkbox" onChange={this.handleChangeSameAddress} />
+            Same address
+          </label>
+        </div>
         {this.renderBillingForm()}
         {this.renderCreditCardForm()}
         <button className="submitButton" type="submit">Submit</button>
