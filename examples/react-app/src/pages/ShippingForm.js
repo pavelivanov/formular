@@ -6,18 +6,6 @@ import Field from '../components/Field'
 
 export default class ShippingForm extends Component {
 
-  componentDidMount() {
-    shippingForm.on('change', this.reload)
-  }
-
-  componentWillUnmount() {
-    shippingForm.off('change', this.reload)
-  }
-
-  reload = () => {
-    this.forceUpdate()
-  }
-
   handleSubmit = (event) => {
     event.preventDefault()
 
@@ -26,10 +14,8 @@ export default class ShippingForm extends Component {
     shippingForm.submit()
       .then((values) => {
         console.log('values', values)
-        this.reload()
       }, (errors) => {
         console.log('errors', errors)
-        this.reload()
       })
   }
 

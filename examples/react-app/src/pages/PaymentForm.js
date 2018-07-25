@@ -27,22 +27,12 @@ export default class PaymentForm extends Component {
     this.formsGroup = getFormsGroup(false)
   }
 
-  componentDidMount() {
-    this.formsGroup.on('change', this.reload)
-  }
-
-  componentWillUnmount() {
-    this.formsGroup.off('change', this.reload)
-  }
-
   reload = () => {
     this.forceUpdate()
   }
 
   handleSubmit = (event) => {
     event.preventDefault()
-
-    console.log('values', this.formsGroup.getValues())
 
     this.formsGroup.submit()
       .then((values) => {

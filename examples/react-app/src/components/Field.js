@@ -1,16 +1,32 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { Input } from 'formx/react/tags'
 
 
-const Field = ({ field, placeholder }) => (
-  <div className="field">
-    <Input field={field} placeholder={placeholder} />
-    {
-      Boolean(field.error) && (
-        <span className="error">{field.error}</span>
-      )
-    }
-  </div>
-)
+export default class Field extends Component {
 
-export default Field
+  state = {
+    error: null,
+  }
+
+  handleValidate = (error) => {
+    this.setState({
+      error,
+    })
+  }
+
+  render() {
+    const { error } = this.state
+    const { field, placeholder } = this.props
+
+    return (
+      <div className="field">
+        <Input field={field} placeholder={placeholder} onValidate={this.handleValidate} />
+        {
+          Boolean(error) && (
+            <span className="error">{error}</span>
+          )
+        }
+      </div>
+    )
+  }
+}

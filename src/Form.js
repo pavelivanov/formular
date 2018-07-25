@@ -12,7 +12,7 @@ class Form {
    */
   constructor(options) {
     this.initialOptions = options
-    this.events = new Events()
+    this._events = new Events()
 
     this.setup(options)
   }
@@ -98,11 +98,11 @@ class Form {
   }
 
   on(eventName, handler) {
-    this.events.subscribe(eventName, handler)
+    this._events.subscribe(eventName, handler)
   }
 
   off(eventName, handler) {
-    this.events.unsubscribe(eventName, handler)
+    this._events.unsubscribe(eventName, handler)
   }
 }
 

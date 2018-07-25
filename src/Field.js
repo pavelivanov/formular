@@ -1,3 +1,6 @@
+import Events from './Events'
+
+
 const asyncSome = async (arr, calle) => {
   if (arr.length) {
     const [ item, ...restItems ] = arr
@@ -32,7 +35,8 @@ class Field {
     this.isChangedAfterValidation   = false
     this.isValid                    = true
 
-    this._validators = options.validate || options
+    this._events                    = new Events()
+    this._validators                = options.validate || options
   }
 
   async validate() {
@@ -56,6 +60,8 @@ class Field {
     this.isValid = !error
     this.error = error
 
+    this._events.dispatch('validate', error)
+
     return error
   }
 
@@ -70,6 +76,14 @@ class Field {
         await this.validate()
       }
     }
+  }
+
+  on(eventName, handler) {
+    this._events.subscribe(eventName, handler)
+  }
+
+  off(eventName, handler) {
+    this._events.unsubscribe(eventName, handler)
   }
 }
 
