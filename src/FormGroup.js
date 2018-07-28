@@ -1,3 +1,6 @@
+import Events from './Events'
+
+
 class FormGroup {
 
   /**
@@ -6,7 +9,21 @@ class FormGroup {
    */
   constructor(forms) {
     this.forms = forms
+    this._events = new Events()
+
+    // this.subscribe()
   }
+
+  // subscribe() {
+  //   const forms = Object.values(this.forms)
+  //
+  //   forms.forEach((form) => {
+  //     // TODO add debounce
+  //     form.on('change', () => {
+  //       this._events.dispatch('change')
+  //     })
+  //   })
+  // }
 
   async validate() {
     const forms     = Object.values(this.forms)
@@ -14,6 +31,19 @@ class FormGroup {
     const isValid   = statuses.every((isValid) => isValid)
 
     return isValid
+  }
+
+  setValues(values) {
+    const formNames = Object.keys(values)
+
+    return Promise.all(
+      formNames.map((formName) => {
+        const form = this.forms[formName]
+        const formValues = values[formName]
+
+        return form.setValues(formValues)
+      })
+    )
   }
 
   getValues() {

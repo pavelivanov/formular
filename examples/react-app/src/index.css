@@ -6,6 +6,18 @@ body {
   user-select: none;
 }
 
+hr {
+  margin: 20px 0;
+}
+
+button {
+  background-color: #eee;
+  border: 1px solid #ddd;
+  padding: 5px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
 
 .col {
   display: inline-block;

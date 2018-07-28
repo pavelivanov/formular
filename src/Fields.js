@@ -44,14 +44,16 @@ class Fields {
    * @param {Object} values
    */
   setValues(values) {
-    Object.keys(values).forEach((fieldName) => {
-      const value = values[fieldName]
-      const field = this[fieldName]
+    return Promise.all(
+      Object.keys(values).map((fieldName) => {
+        const value = values[fieldName]
+        const field = this[fieldName]
 
-      if (field) {
-        field.set(value)
-      }
-    })
+        if (field) {
+          return field.set(value)
+        }
+      })
+    )
   }
 
   async validate() {

@@ -18,8 +18,8 @@ class Form {
   }
 
   setup(options) {
-    this.fields         = new Fields(this, options.fields, options.initialValues)
-    this.isValid        = true
+    this.fields   = new Fields(this, options.fields, options.initialValues)
+    this.isValid  = true
   }
 
   /**
@@ -37,7 +37,7 @@ class Form {
    * @param {Object} values
    */
   setValues(values) {
-    this.fields.setValues(values)
+    return this.fields.setValues(values)
   }
 
   getValues() {
@@ -53,6 +53,19 @@ class Form {
     return values
   }
 
+  unsetValues() {
+    const fieldNames = Object.keys(this.fields)
+
+    return Promise.all(
+      fieldNames.map((fieldName) => {
+        const field = this.fields[fieldName]
+
+        // TODO set initial value if exist
+        return field.set('')
+      })
+    )
+  }
+
   getErrors() {
     const fieldNames = Object.keys(this.fields)
     const errors = {}
@@ -64,10 +77,6 @@ class Form {
     })
 
     return errors
-  }
-
-  triggerChange() {
-    this.events.dispatch('change')
   }
 
   async validate() {

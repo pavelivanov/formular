@@ -85,7 +85,7 @@ const _expDate = (value) => {
 
   if (
     valueYear < currYear
-    || valueYear === currYear && valueMonth < currMonth
+    || (valueYear === currYear && valueMonth < currMonth)
   ) {
     return true
   }
@@ -105,22 +105,25 @@ export const cardCVV = (value) => {
 }
 
 
-export const successAsyncValidation = async (value) => {
-  const isValid = await new Promise((resolve) => {
+const asyncValidation = (isValid) =>
+  new Promise((resolve) => {
     setTimeout(() => {
-      resolve(true)
+      resolve(isValid)
     }, 1000)
   })
 
-  return undefined
+export const successAsyncValidation = async () => {
+  const isValid = await asyncValidation(true)
+
+  if (!isValid) {
+    return 'Async validation failed'
+  }
 }
 
-export const failAsyncValidation = async (value) => {
-  const isValid = await new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true)
-    }, 1000)
-  })
+export const failAsyncValidation = async () => {
+  const isValid = await asyncValidation(false)
 
-  return 'Async validation failed'
+  if (!isValid) {
+    return 'Async validation failed'
+  }
 }

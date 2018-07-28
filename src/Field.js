@@ -60,7 +60,7 @@ class Field {
     this.isValid = !error
     this.error = error
 
-    this._events.dispatch('validate', error)
+    this._events.dispatch('validate', this.error)
 
     return error
   }
@@ -75,6 +75,8 @@ class Field {
         this.isChangedAfterValidation = true
         await this.validate()
       }
+
+      this._events.dispatch('change', this.value)
     }
   }
 

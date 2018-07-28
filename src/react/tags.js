@@ -1,8 +1,8 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 
 
-class Input extends Component {
+class Input extends PureComponent {
 
   static propTypes = {
     field: PropTypes.object.isRequired,
@@ -23,16 +23,18 @@ class Input extends Component {
   componentWillMount() {
     const { field } = this.props
 
-    field.on('validate', this.handleValidate)
+    field.on('validate', this.handleFieldValidate)
+    field.on('change', this.handleFieldChange)
   }
 
   componentWillUnmount() {
     const { field } = this.props
 
-    field.off('validate', this.handleValidate)
+    field.off('validate', this.handleFieldValidate)
+    field.off('change', this.handleFieldChange)
   }
 
-  handleValidate = (error) => {
+  handleFieldValidate = (error) => {
     const { onValidate } = this.props
 
     if (typeof onValidate === 'function') {
@@ -40,7 +42,13 @@ class Input extends Component {
     }
   }
 
-  handleChange = async (event) => {
+  handleFieldChange = (value) => {
+    this.setState({
+      value,
+    })
+  }
+
+  handleInputChange = async (event) => {
     const { field } = this.props
     const value = event.target.value
 
@@ -66,7 +74,7 @@ class Input extends Component {
         {...rest}
         type="text"
         value={value}
-        onChange={this.handleChange}
+        onChange={this.handleInputChange}
         onBlur={this.handleBlur}
       />
     )

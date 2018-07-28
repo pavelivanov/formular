@@ -29,7 +29,7 @@
 .form {
   width: 500px;
   margin: 0 auto;
-  padding: 50px 0 100px;
+  padding: 30px 0 100px;
   /* padding-left: 80px; */
 }
 
@@ -75,9 +75,7 @@
 }
 
 .submitButton {
-  padding: 5px 12px;
   margin-top: 30px;
-  font-size: 14px;
 }
 
 

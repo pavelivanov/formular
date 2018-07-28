@@ -47,7 +47,7 @@ export default class PaymentPage extends Component {
       paymentMethod,
     }
 
-    this.formsGroup = getFormsGroup(sameAddress, paymentMethod)
+    this.formGroup = getFormsGroup(sameAddress, paymentMethod)
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -55,8 +55,43 @@ export default class PaymentPage extends Component {
     const { sameAddress: newSameAddress, paymentMethod: newPaymentMethod } = nextState
 
     if (sameAddress !== newSameAddress || paymentMethod !== newPaymentMethod) {
-      this.formsGroup = getFormsGroup(newSameAddress, newPaymentMethod)
+      this.formGroup = getFormsGroup(newSameAddress, newPaymentMethod)
     }
+  }
+
+  setInitialValues = async () => {
+    await this.formGroup.setValues({
+      shipping: {
+        firstName: 'foo',
+        lastName: 'bar',
+        street: '121 South Carondelete',
+        zipCode: '10095',
+        city: 'Los Angeles',
+        state: 'CA',
+      },
+      billing: {
+        firstName: 'foo',
+        lastName: 'bar',
+        street: '121 South Carondelete',
+        zipCode: '10095',
+        city: 'Los Angeles',
+        state: 'CA',
+      },
+      creditCard: {
+        cardNumber: '4242424242424242',
+        holderName: 'Foo Bar',
+        expDate: '1122',
+        cvc: '333',
+      },
+    })
+
+    this.forceUpdate()
+  }
+
+  cleanCreditCardFields = async () => {
+    await this.formGroup.forms.creditCard.unsetValues()
+
+    this.forceUpdate()
   }
 
   handleChangePaymentMethod = (paymentMethod) => {
@@ -74,7 +109,7 @@ export default class PaymentPage extends Component {
   handleSubmit = (event) => {
     event.preventDefault()
 
-    this.formsGroup.submit()
+    this.formGroup.submit()
       .then((values) => {
         console.log('values', values)
       }, (errors) => {
@@ -85,10 +120,13 @@ export default class PaymentPage extends Component {
 
   render() {
     const { sameAddress, paymentMethod } = this.state
-    const { forms: { shipping, billing, creditCard } } = this.formsGroup
+    const { forms: { shipping, billing, creditCard } } = this.formGroup
 
     return (
       <form className="form" onSubmit={this.handleSubmit}>
+        <button type="button" onClick={this.setInitialValues}>Set initial values to all forms</button><br /><br />
+        <button type="button" onClick={this.cleanCreditCardFields}>Clear credit card fields</button>
+        <hr />
         <PaymentMethods onChange={this.handleChangePaymentMethod} />
         <ShippingForm className="formSection" fields={shipping.fields} />
         {
