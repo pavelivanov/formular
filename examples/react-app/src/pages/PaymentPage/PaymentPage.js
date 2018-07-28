@@ -88,7 +88,13 @@ export default class PaymentPage extends Component {
     this.forceUpdate()
   }
 
-  cleanCreditCardFields = async () => {
+  clearFormsValues = async () => {
+    await this.formGroup.unsetValues()
+
+    this.forceUpdate()
+  }
+
+  clearCreditCardFields = async () => {
     await this.formGroup.forms.creditCard.unsetValues()
 
     this.forceUpdate()
@@ -124,9 +130,18 @@ export default class PaymentPage extends Component {
 
     return (
       <form className="form" onSubmit={this.handleSubmit}>
-        <button type="button" onClick={this.setInitialValues}>Set initial values to all forms</button><br /><br />
-        <button type="button" onClick={this.cleanCreditCardFields}>Clear credit card fields</button>
+        <div className="col col-6">
+          <button type="button" onClick={this.setInitialValues}>Set initial values to all forms</button><br /><br />
+        </div>
+        <div className="col col-6">
+          <button type="button" onClick={this.clearFormsValues}>Clear forms values</button><br /><br />
+        </div>
+        <div className="col col-12">
+          <button type="button" onClick={this.clearCreditCardFields}>Clear credit card fields</button>
+        </div>
+
         <hr />
+
         <PaymentMethods onChange={this.handleChangePaymentMethod} />
         <ShippingForm className="formSection" fields={shipping.fields} />
         {

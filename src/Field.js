@@ -23,12 +23,13 @@ class Field {
    *
    * @param form
    * @param name
-   * @param {Object|Array} options - can be object options or list of validators
+   * @param {Object|Array} opts - can be object opts or list of validators
    */
-  constructor(form, name, options) {
+  constructor(form, name, opts) {
     this.form                       = form
     this.name                       = name
-    this.value                      = options.value === undefined || options.value === null ? '' : options.value
+    this.value                      = opts.value === undefined || opts.value === null ? '' : opts.value
+    this.initialValue               = this.value
     this.error                      = null
     this.isChanged                  = false
     this.isValidated                = false
@@ -36,7 +37,7 @@ class Field {
     this.isValid                    = true
 
     this._events                    = new Events()
-    this._validators                = options.validate || options
+    this._validators                = opts.validate || opts
   }
 
   async validate() {
@@ -78,6 +79,17 @@ class Field {
 
       this._events.dispatch('change', this.value)
     }
+  }
+
+  unset() {
+    this.value                      = this.initialValue
+    this.error                      = null
+    this.isChanged                  = false
+    this.isValidated                = false
+    this.isChangedAfterValidation   = false
+    this.isValid                    = true
+
+    this._events.dispatch('change', this.value)
   }
 
   on(eventName, handler) {

@@ -12,6 +12,9 @@ class Form {
    */
   constructor(options) {
     this.initialOptions = options
+    this.isChanged = false // TODO connect to Field
+    this.isValid = null
+
     this._events = new Events()
 
     this.setup(options)
@@ -56,14 +59,14 @@ class Form {
   unsetValues() {
     const fieldNames = Object.keys(this.fields)
 
-    return Promise.all(
-      fieldNames.map((fieldName) => {
-        const field = this.fields[fieldName]
+    this.isChanged = false
+    this.isValid = null
 
-        // TODO set initial value if exist
-        return field.set('')
-      })
-    )
+    fieldNames.map((fieldName) => {
+      const field = this.fields[fieldName]
+
+      return field.unset()
+    })
   }
 
   getErrors() {

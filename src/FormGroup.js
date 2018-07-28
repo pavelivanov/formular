@@ -59,6 +59,16 @@ class FormGroup {
     return values
   }
 
+  unsetValues() {
+    const formNames = Object.keys(this.forms)
+
+    formNames.map((formName) => {
+      const form = this.forms[formName]
+
+      return form.unsetValues()
+    })
+  }
+
   // TODO looks like getValues() if we need rewrite it? Write getKeyValues(key)
   getErrors() {
     const formNames = Object.keys(this.forms)

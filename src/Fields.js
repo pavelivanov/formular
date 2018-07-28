@@ -32,6 +32,7 @@ class Fields {
 
       // TODO if we may move this into Field
       if (initialValue !== undefined) {
+        opts.initialValue = initialValue
         opts.value = initialValue
       }
 
