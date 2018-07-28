@@ -13,7 +13,7 @@ class Input extends Component {
   constructor(props) {
     super()
 
-    const { value } = props
+    const { field: { value } } = props
 
     this.state = {
       value: value || '',

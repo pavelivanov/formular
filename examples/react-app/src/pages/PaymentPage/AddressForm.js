@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 
-import Field from '../components/Field'
+import Field from '../../components/Field'
 
 
 class AddressForm extends PureComponent {

@@ -2,15 +2,18 @@
   "name": "react-app",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://formx.surge.sh/",
   "scripts": {
-    "start": "rimraf ./node_modules/formx && cp -r ../../lib ./node_modules/formx && react-scripts start",
-    "build": "react-scripts build",
+    "copy-formx": "rimraf ./node_modules/formx && cp -r ../../lib ./node_modules/formx",
+    "start": "npm run copy-formx && react-scripts start",
+    "build": "npm run copy-formx && react-scripts build && surge -p ./build -d formx.surge.sh",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "dependencies": {
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
+    "react-radio-group": "^3.0.3",
     "react-router-dom": "^4.3.1",
     "react-scripts": "1.1.4"
   },
