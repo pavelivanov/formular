@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import { FormxGroup } from 'formx'
 import { shippingForm, billingForm, creditCardForm } from '../forms'
 
-import Field from '../components/Field'
+import ShippingForm from '../components/ShippingForm'
+import BillingForm from '../components/BillingForm'
+import CreditCardForm from '../components/CreditCardForm'
 
 
 const getFormsGroup = (isSameAddress) => {
@@ -27,73 +29,40 @@ export default class PaymentForm extends Component {
     this.formsGroup = getFormsGroup(false)
   }
 
-  reload = () => {
-    this.forceUpdate()
-  }
-
   handleSubmit = (event) => {
     event.preventDefault()
 
     this.formsGroup.submit()
       .then((values) => {
         console.log('values', values)
-        this.reload()
       }, (errors) => {
         console.log('errors', errors)
-        this.reload()
+        this.forceUpdate()
       })
   }
 
   handleChangeSameAddress = (event) => {
     this.formsGroup = getFormsGroup(event.target.checked)
-    this.reload()
-  }
-  
-  renderShippingForm() {
-    
-    return (
-      <div className="formSection">
-        <Field field={shippingForm.fields.address} placeholder="Address" />
-        <Field field={shippingForm.fields.telephone} placeholder="Telephone" />
-      </div>
-    )
-  }
-  
-  renderBillingForm() {
-    if (!this.formsGroup.forms.billing) {
-      return null
-    }
-
-    return (
-      <div className="formSection">
-        <Field field={billingForm.fields.address} placeholder="Address" />
-        <Field field={billingForm.fields.telephone} placeholder="Telephone" />
-      </div>
-    )
-  }
-
-  renderCreditCardForm() {
-
-    return (
-      <div className="formSection">
-        <Field field={creditCardForm.fields.cardNumber} placeholder="Card number" />
-      </div>
-    )
+    this.forceUpdate()
   }
 
   render() {
 
     return (
       <form className="form" onSubmit={this.handleSubmit}>
-        {this.renderShippingForm()}
+        <ShippingForm className="formSection" fields={shippingForm.fields} />
         <div className="formSection">
           <label>
             <input type="checkbox" onChange={this.handleChangeSameAddress} />
             Same address
           </label>
         </div>
-        {this.renderBillingForm()}
-        {this.renderCreditCardForm()}
+        {
+          this.formsGroup.forms.billing && (
+            <BillingForm className="formSection" fields={billingForm.fields} />
+          )
+        }
+        <CreditCardForm className="formSection" fields={creditCardForm.fields} />
         <button className="submitButton" type="submit">Submit</button>
       </form>
     )

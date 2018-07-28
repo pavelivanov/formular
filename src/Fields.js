@@ -55,12 +55,9 @@ class Fields {
   }
 
   async validate() {
-    // TODO rewrite with generators
-    const isValid = asyncEvery(Object.keys(this), async (fieldName) => {
-      const error = await this[fieldName].validate()
-
-      return !error
-    })
+    const fieldNames  = Object.keys(this)
+    const errors      = await Promise.all(fieldNames.map((fieldName) => this[fieldName].validate()))
+    const isValid     = errors.every((error) => !error)
 
     return isValid
   }

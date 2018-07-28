@@ -4,8 +4,14 @@ import { Input } from 'formx/react/tags'
 
 export default class Field extends Component {
 
-  state = {
-    error: null,
+  constructor(props) {
+    super()
+
+    const { field } = props
+
+    this.state = {
+      error: field.error || null,
+    }
   }
 
   handleValidate = (error) => {
@@ -20,7 +26,12 @@ export default class Field extends Component {
 
     return (
       <div className="field">
-        <Input field={field} placeholder={placeholder} onValidate={this.handleValidate} />
+        <Input
+          className={error ? 'withError' : ''}
+          field={field}
+          placeholder={placeholder}
+          onValidate={this.handleValidate}
+        />
         {
           Boolean(error) && (
             <span className="error">{error}</span>
