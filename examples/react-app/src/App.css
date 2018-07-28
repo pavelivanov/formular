@@ -28,7 +28,9 @@
 
 .form {
   width: 500px;
-  padding-left: 80px;
+  margin: 0 auto;
+  padding: 50px 0 100px;
+  /* padding-left: 80px; */
 }
 
 .formSection {
@@ -61,6 +63,11 @@
   border-color: #ea284d;
 }
 
+.field input[readonly] {
+  background-color: #eee;
+  cursor: default;
+}
+
 .error {
   margin-top: 5px;
   font-size: 12px;
@@ -71,4 +78,14 @@
   padding: 5px 12px;
   margin-top: 30px;
   font-size: 14px;
+}
+
+
+input[type="radio"] {
+  margin-left: 30px;
+  margin-right: 10px;
+}
+
+input[type="radio"]:first-child {
+  margin-left: 10px;
 }

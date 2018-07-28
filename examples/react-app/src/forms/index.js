@@ -4,7 +4,7 @@ import creditCard from './creditCard'
 
 
 export {
-  shipping as shippingForm,
-  billing as billingForm,
-  creditCard as creditCardForm,
+  shipping,
+  billing,
+  creditCard,
 }

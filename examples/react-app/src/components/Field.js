@@ -22,7 +22,7 @@ export default class Field extends Component {
 
   render() {
     const { error } = this.state
-    const { field, placeholder } = this.props
+    const { field, placeholder, readOnly } = this.props
 
     return (
       <div className="field">
@@ -31,6 +31,7 @@ export default class Field extends Component {
           field={field}
           placeholder={placeholder}
           onValidate={this.handleValidate}
+          readOnly={readOnly}
         />
         {
           Boolean(error) && (

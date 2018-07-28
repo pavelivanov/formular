@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { FormxGroup } from 'formx'
-import { shippingForm, billingForm, creditCardForm } from '../../forms'
+import { shipping, billing, creditCard } from '../../forms'
 
 import PaymentMethods from './PaymentMethods'
 import ShippingForm from './ShippingForm'
@@ -9,24 +9,28 @@ import CreditCardForm from './CreditCardForm'
 
 
 const getFormsGroup = (isSameAddress, paymentMethod) => {
+  let forms
+
   if (paymentMethod === 'payPal') {
-    return new FormxGroup({
-      shipping: shippingForm,
-    })
+    forms = {
+      shipping,
+    }
+  }
+  else if (isSameAddress) {
+    forms = {
+      shipping,
+      creditCard,
+    }
+  }
+  else {
+    forms = {
+      shipping,
+      billing,
+      creditCard,
+    }
   }
 
-  if (isSameAddress) {
-    return new FormxGroup({
-      shipping: shippingForm,
-      creditCard: creditCardForm,
-    })
-  }
-
-  return new FormxGroup({
-    shipping: shippingForm,
-    billing: billingForm,
-    creditCard: creditCardForm,
-  })
+  return new FormxGroup(forms)
 }
 
 
@@ -80,30 +84,31 @@ export default class PaymentPage extends Component {
   }
 
   render() {
-    const { paymentMethod } = this.state
+    const { sameAddress, paymentMethod } = this.state
+    const { forms: { shipping, billing, creditCard } } = this.formsGroup
 
     return (
       <form className="form" onSubmit={this.handleSubmit}>
         <PaymentMethods onChange={this.handleChangePaymentMethod} />
-        <ShippingForm className="formSection" fields={shippingForm.fields} />
+        <ShippingForm className="formSection" fields={shipping.fields} />
         {
           paymentMethod === 'creditCard' && (
             <div className="formSection">
               <label>
-                <input type="checkbox" onChange={this.handleChangeSameAddress} />
+                <input type="checkbox" checked={sameAddress} onChange={this.handleChangeSameAddress} />
                 Same address
               </label>
             </div>
           )
         }
         {
-          this.formsGroup.forms.billing && (
-            <BillingForm className="formSection" fields={billingForm.fields} />
+          billing && (
+            <BillingForm className="formSection" fields={billing.fields} />
           )
         }
         {
-          this.formsGroup.forms.creditCard && (
-            <CreditCardForm className="formSection" fields={creditCardForm.fields} />
+          creditCard && (
+            <CreditCardForm className="formSection" fields={creditCard.fields} />
           )
         }
         <button className="submitButton" type="submit">Submit</button>

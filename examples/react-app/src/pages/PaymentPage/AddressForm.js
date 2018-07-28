@@ -32,12 +32,12 @@ class AddressForm extends PureComponent {
           <Field field={fields.state} placeholder="State" />
         </div>
         <div className="col col-6">
-          <Field field={fields.country} placeholder="Country" />
+          <Field field={fields.country} placeholder="Country" readOnly />
         </div>
         {
           withTelephone && (
             <div className="col col-6">
-              <Field field={fields.telephone} placeholder="Telephone" />
+              <Field field={fields.telephone} placeholder="Telephone (optional)" />
             </div>
           )
         }
