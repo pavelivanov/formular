@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { FormxGroup } from 'formx'
+import { connect } from 'formx/react'
 import { shipping, billing, creditCard } from '../../forms'
 
 import PaymentMethods from './PaymentMethods'
@@ -9,32 +10,30 @@ import CreditCardForm from './CreditCardForm'
 
 
 const getFormsGroup = (isSameAddress, paymentMethod) => {
-  let forms
-
   if (paymentMethod === 'payPal') {
-    forms = {
+    return {
       shipping,
     }
   }
-  else if (isSameAddress) {
-    forms = {
+
+  if (isSameAddress) {
+    return {
       shipping,
-      creditCard,
-    }
-  }
-  else {
-    forms = {
-      shipping,
-      billing,
       creditCard,
     }
   }
 
-  return new FormxGroup(forms)
+  return {
+    shipping,
+    billing,
+    creditCard,
+  }
 }
 
+const formGroup = new FormxGroup({})
 
-export default class PaymentPage extends Component {
+
+class PaymentPage extends Component {
 
   constructor() {
     super()
@@ -47,7 +46,7 @@ export default class PaymentPage extends Component {
       paymentMethod,
     }
 
-    this.formGroup = getFormsGroup(sameAddress, paymentMethod)
+    formGroup.replace(getFormsGroup(sameAddress, paymentMethod))
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -55,12 +54,12 @@ export default class PaymentPage extends Component {
     const { sameAddress: newSameAddress, paymentMethod: newPaymentMethod } = nextState
 
     if (sameAddress !== newSameAddress || paymentMethod !== newPaymentMethod) {
-      this.formGroup = getFormsGroup(newSameAddress, newPaymentMethod)
+      formGroup.replace(getFormsGroup(newSameAddress, newPaymentMethod))
     }
   }
 
-  setInitialValues = async () => {
-    await this.formGroup.setValues({
+  setInitialValues = () => {
+    formGroup.setValues({
       shipping: {
         firstName: 'foo',
         lastName: 'bar',
@@ -84,20 +83,14 @@ export default class PaymentPage extends Component {
         cvc: '333',
       },
     })
-
-    this.forceUpdate()
   }
 
-  clearFormsValues = async () => {
-    await this.formGroup.unsetValues()
-
-    this.forceUpdate()
+  clearFormsValues = () => {
+    formGroup.unsetValues()
   }
 
-  clearCreditCardFields = async () => {
-    await this.formGroup.forms.creditCard.unsetValues()
-
-    this.forceUpdate()
+  clearCreditCardFields = () => {
+    formGroup.forms.creditCard.unsetValues()
   }
 
   handleChangePaymentMethod = (paymentMethod) => {
@@ -115,18 +108,30 @@ export default class PaymentPage extends Component {
   handleSubmit = (event) => {
     event.preventDefault()
 
-    this.formGroup.submit()
+    formGroup.submit()
       .then((values) => {
         console.log('values', values)
       }, (errors) => {
         console.log('errors', errors)
-        this.forceUpdate()
       })
   }
 
+  /*
+
+    1)  setState добавлен в каждый Field, т.е. поля независимы от родителей и обновляются сами.
+        выходит что когда мы делаем form.setValues(), form.unsetValues(), etc нам не нужно заботиться о рендере родителя
+
+    2)  на прмиере sameAddress - в данном компоненте нам нужно изменять UI состояние чекбокса, поэтому имеет место быть
+        ререндер, но также мы изменяем formGroup. Здесь же добавлен connect, который при изменении formGroup вызывает
+        ререндер. Выходит что при изменении sameAddress ререндер вызывается дважды...
+
+   */
+
   render() {
     const { sameAddress, paymentMethod } = this.state
-    const { forms: { shipping, billing, creditCard } } = this.formGroup
+    const { forms: { shipping, billing, creditCard } } = formGroup
+
+    console.log(444, formGroup)
 
     return (
       <form className="form" onSubmit={this.handleSubmit}>
@@ -169,3 +174,6 @@ export default class PaymentPage extends Component {
     )
   }
 }
+
+
+export default connect(formGroup)(PaymentPage)

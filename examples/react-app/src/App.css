@@ -68,6 +68,17 @@
   cursor: default;
 }
 
+.inputRelativeWrapper {
+  position: relative;
+}
+
+.inputRelativeWrapper .spinner {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  margin-top: -10px;
+}
+
 .error {
   margin-top: 5px;
   font-size: 12px;

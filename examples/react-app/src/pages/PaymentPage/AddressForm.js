@@ -9,7 +9,7 @@ class AddressForm extends PureComponent {
     const { className, fields, withTelephone } = this.props
 
     return (
-      <div className={className}>
+      <div className={`row ${className}`}>
         <div className="col col-6">
           <Field field={fields.firstName} placeholder="First name" />
         </div>

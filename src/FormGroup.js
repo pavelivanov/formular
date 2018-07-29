@@ -1,5 +1,8 @@
 import Events from './Events'
+import { debounce } from './util'
 
+
+const formEvents = [ 'change', 'set values', 'unset values' ]
 
 class FormGroup {
 
@@ -11,19 +14,51 @@ class FormGroup {
     this.forms = forms
     this._events = new Events()
 
-    // this.subscribe()
+    this._subscribe()
   }
 
-  // subscribe() {
-  //   const forms = Object.values(this.forms)
-  //
-  //   forms.forEach((form) => {
-  //     // TODO add debounce
-  //     form.on('change', () => {
-  //       this._events.dispatch('change')
-  //     })
-  //   })
-  // }
+  /**
+   * Replace old forms with new
+   *
+   * @param {Object} newForms
+   */
+  replace(newForms) {
+    this._unsubscribe()
+
+    this.forms = newForms
+
+    this._subscribe()
+
+    this._events.dispatch('replace')
+  }
+
+  // Private methods ------------------------------------ /
+
+  _handleFormEvent = (eventName) => debounce(() => {
+    this._events.dispatch(eventName)
+  }, 100)
+
+  _subscribe() {
+    const forms = Object.values(this.forms)
+
+    forms.forEach((form) => {
+      formEvents.forEach((eventName) => {
+        form.on(eventName, this._handleFormEvent(eventName))
+      })
+    })
+  }
+
+  _unsubscribe() {
+    const forms = Object.values(this.forms)
+
+    forms.forEach((form) => {
+      formEvents.forEach((eventName) => {
+        form.off(eventName, this._handleFormEvent(eventName))
+      })
+    })
+  }
+
+  // Public methods ------------------------------------- /
 
   async validate() {
     const forms     = Object.values(this.forms)
@@ -36,14 +71,14 @@ class FormGroup {
   setValues(values) {
     const formNames = Object.keys(values)
 
-    return Promise.all(
-      formNames.map((formName) => {
-        const form = this.forms[formName]
-        const formValues = values[formName]
+    formNames.map((formName) => {
+      const form = this.forms[formName]
+      const formValues = values[formName]
 
-        return form.setValues(formValues)
-      })
-    )
+      return form.setValues(formValues)
+    })
+
+    this._events.dispatch('set values')
   }
 
   getValues() {
@@ -67,6 +102,8 @@ class FormGroup {
 
       return form.unsetValues()
     })
+
+    this._events.dispatch('unset values')
   }
 
   // TODO looks like getValues() if we need rewrite it? Write getKeyValues(key)
@@ -97,42 +134,13 @@ class FormGroup {
     return values
   }
 
-  // Events ------------------------------------------ /
-
-  /**
-   *
-   * @param {Object} form
-   * @param {function} handler
-   * @returns {function(...[*]): *}
-   */
-  wrapEventHandler(form, handler) {
-    return (...args) => handler({ form, args })
-  }
-
-  /**
-   *
-   * @param {string} eventName
-   * @param {function} handler
-   * @param {Boolean} isOn
-   */
-  toggleSubscribe(eventName, handler, isOn) {
-    const formNames = Object.keys(this.forms)
-
-    formNames.forEach((formName) => {
-      const form = this.forms[formName]
-      const method = isOn ? form.on : form.off
-
-      method.call(form, eventName, this.wrapEventHandler(form, handler))
-    })
-  }
-
   /**
    *
    * @param {string} eventName
    * @param {function} handler
    */
   on(eventName, handler) {
-    this.toggleSubscribe(eventName, handler, true)
+    this._events.subscribe(eventName, handler)
   }
 
   /**
@@ -141,7 +149,7 @@ class FormGroup {
    * @param {function} handler
    */
   off(eventName, handler) {
-    this.toggleSubscribe(eventName, handler, false)
+    this._events.unsubscribe(eventName, handler)
   }
 }
 

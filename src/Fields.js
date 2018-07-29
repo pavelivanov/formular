@@ -1,20 +1,5 @@
 import Field from './Field'
-
-
-const asyncEvery = async (arr, calle) => {
-  if (arr.length) {
-    const [ item, ...restItems ] = arr
-    const isOk = await calle(item)
-
-    if (isOk) {
-      return asyncEvery(restItems, calle)
-    }
-
-    return false
-  }
-
-  return true
-}
+import { asyncEvery } from './util'
 
 
 class Fields {
@@ -45,16 +30,14 @@ class Fields {
    * @param {Object} values
    */
   setValues(values) {
-    return Promise.all(
-      Object.keys(values).map((fieldName) => {
-        const value = values[fieldName]
-        const field = this[fieldName]
+    Object.keys(values).map((fieldName) => {
+      const value = values[fieldName]
+      const field = this[fieldName]
 
-        if (field) {
-          return field.set(value)
-        }
-      })
-    )
+      if (field) {
+        return field.set(value)
+      }
+    })
   }
 
   async validate() {

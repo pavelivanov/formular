@@ -1,20 +1,5 @@
 import Events from './Events'
-
-
-const asyncSome = async (arr, calle) => {
-  if (arr.length) {
-    const [ item, ...restItems ] = arr
-    const isMatch = await calle(item)
-
-    if (isMatch) {
-      return true
-    }
-
-    return asyncSome(restItems, calle)
-  }
-
-  return false
-}
+import { asyncSome, debounce } from './util'
 
 
 class Field {
@@ -40,13 +25,15 @@ class Field {
     this._validators                = opts.validate || opts
   }
 
-  async validate() {
+  validate = debounce(async () => {
     // if field value not changed from previous validation then return previous validation result
     if (this.isValidated && !this.isChangedAfterValidation) {
       return this.error
     }
 
     let error
+
+    this._events.dispatch('start validate')
 
     if (this._validators && this._validators.length) {
       await asyncSome(this._validators, async (validator) => {
@@ -64,20 +51,21 @@ class Field {
     this._events.dispatch('validate', this.error)
 
     return error
-  }
+  }, 200)
 
-  async set(value) {
+  set(value) {
     if (value !== this.value) {
       this.value = value
       this.isChanged = true
 
+      this._events.dispatch('change', this.value)
+
       // if field has already been validated then validate it on every change
       if (this.isValidated) {
         this.isChangedAfterValidation = true
-        await this.validate()
-      }
 
-      this._events.dispatch('change', this.value)
+        this.validate()
+      }
     }
   }
 

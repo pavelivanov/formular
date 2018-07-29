@@ -19,10 +19,14 @@ button {
 }
 
 
+.row {
+  margin: -4px;
+}
+
 .col {
   display: inline-block;
   vertical-align: top;
-  padding: 5px;
+  padding: 4px;
   box-sizing: border-box;
 }
 
@@ -38,3 +42,53 @@ button {
 .col-10 {width: 83.33%;}
 .col-11 {width: 91.66%;}
 .col-12 {width: 100%;}
+
+
+.inlineItems {
+  margin: -4px;
+  font-size: 0;
+}
+
+.inlineItems > div {
+  display: inline-block;
+  vertical-align: top;
+  padding: 4px;
+}
+
+
+/* Spinner */
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  display: block;
+  background: #fff;
+  background: linear-gradient(to right, #000 0%, #000 80%, #fff 81%);
+  position: relative;
+  border-radius: 50%;
+  transform: translateZ(0);
+  animation: spinner 600ms infinite linear;
+}
+
+.spinner:after {
+ width: 16px;
+ height: 16px;
+ background: #fff;
+ border-radius: 50%;
+ content: '';
+ margin: auto;
+ position: absolute;
+ top: 0;
+ bottom: 0;
+ right: 0;
+ left: 0;
+}

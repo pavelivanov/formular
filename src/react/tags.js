@@ -23,6 +23,7 @@ class Input extends PureComponent {
   componentWillMount() {
     const { field } = this.props
 
+    field.on('start validate', this.handleFieldStartValidate)
     field.on('validate', this.handleFieldValidate)
     field.on('change', this.handleFieldChange)
   }
@@ -30,8 +31,17 @@ class Input extends PureComponent {
   componentWillUnmount() {
     const { field } = this.props
 
+    field.off('start validate', this.handleFieldStartValidate)
     field.off('validate', this.handleFieldValidate)
     field.off('change', this.handleFieldChange)
+  }
+
+  handleFieldStartValidate = () => {
+    const { onStartValidate } = this.props
+
+    if (typeof onStartValidate === 'function') {
+      onStartValidate()
+    }
   }
 
   handleFieldValidate = (error) => {
@@ -52,7 +62,7 @@ class Input extends PureComponent {
     const { field } = this.props
     const value = event.target.value
 
-    await field.set(value)
+    field.set(value)
 
     this.setState({
       value,
@@ -67,7 +77,7 @@ class Input extends PureComponent {
 
   render() {
     const { value } = this.state
-    const { field, onValidate, ...rest } = this.props
+    const { field, onStartValidate, onValidate, ...rest } = this.props
 
     return (
       <input
