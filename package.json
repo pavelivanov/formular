@@ -20,7 +20,7 @@
   "license": "ISC",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha ./test/*.spec.js --require ./test/_bootstrap.js",
+    "test": "mocha --require @babel/register --require ./test/_bootstrap.js ./test/*.spec.js",
     "dev": "babel ./src --out-dir ./lib --watch",
     "build": "babel ./src --out-dir ./lib"
   },

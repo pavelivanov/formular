@@ -16,6 +16,8 @@
 - [ ] Reset form to default state, options, etc
 - [ ] Add option to `setValues()` to allow set values without validation each field
 - [ ] Checkbox and Radio support (boolean checked, value)
+- [ ] Memo for async validators (decorator)
+- [ ] Option for validation debounce timeout
 
 ### To run examples
 

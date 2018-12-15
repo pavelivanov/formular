@@ -18,7 +18,7 @@ class Field {
     this.error                      = null
     this.isChanged                  = false
     this.isValidated                = false
-    this.isChangedAfterValidation   = false
+    // this.isChangedAfterValidation   = false
     this.isValid                    = true
 
     this._events                    = new Events()
@@ -27,9 +27,9 @@ class Field {
 
   validate = debounce(async () => {
     // if field value not changed from previous validation then return previous validation result
-    if (this.isValidated && !this.isChangedAfterValidation) {
-      return this.error
-    }
+    // if (this.isValidated && !this.isChangedAfterValidation) {
+    //   return this.error
+    // }
 
     let error
 
@@ -44,7 +44,7 @@ class Field {
     }
 
     this.isValidated = true
-    this.isChangedAfterValidation = false
+    // this.isChangedAfterValidation = false
     this.isValid = !error
     this.error = error
 
@@ -61,11 +61,11 @@ class Field {
       this._events.dispatch('change', this.value)
 
       // if field has already been validated then validate it on every change
-      if (this.isValidated) {
-        this.isChangedAfterValidation = true
-
-        this.validate()
-      }
+      // if (this.isValidated) {
+      //   this.isChangedAfterValidation = true
+      //
+      //   this.validate()
+      // }
     }
   }
 
@@ -74,7 +74,7 @@ class Field {
     this.error                      = null
     this.isChanged                  = false
     this.isValidated                = false
-    this.isChangedAfterValidation   = false
+    // this.isChangedAfterValidation   = false
     this.isValid                    = true
 
     this._events.dispatch('change', this.value)
