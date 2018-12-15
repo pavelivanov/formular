@@ -63,6 +63,7 @@ class Input extends PureComponent {
     const value = event.target.value
 
     field.set(value)
+    field.debounceValidate() // TODO test this
 
     this.setState({
       value,

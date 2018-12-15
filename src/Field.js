@@ -1,3 +1,5 @@
+import CancelablePromise from 'cancelable-promise'
+
 import Events from './Events'
 import { asyncSome, debounce } from './util'
 
@@ -25,7 +27,7 @@ class Field {
     this._validators                = opts.validate || opts
   }
 
-  validate = debounce(async () => {
+  validate = async () => {
     // if field value not changed from previous validation then return previous validation result
     // if (this.isValidated && !this.isChangedAfterValidation) {
     //   return this.error
@@ -36,22 +38,43 @@ class Field {
     this._events.dispatch('start validate')
 
     if (this._validators && this._validators.length) {
-      await asyncSome(this._validators, async (validator) => {
-        error = await validator(this.value)
+      if (this.cancelablePromise) {
+        this.cancelablePromise.cancel()
+      }
 
-        return Boolean(error)
+      this.cancelablePromise = new CancelablePromise(async (resolve) => {
+        await asyncSome(this._validators, async (validator) => {
+          error = await validator(this.value) // error here is String error message
+          return Boolean(error)
+        })
+        resolve()
+      })
+
+      return this.cancelablePromise.then(() => {
+        // this.isChangedAfterValidation = false
+        this.isValidated = true
+        this.isValid = !error
+        this.error = error
+
+        this._events.dispatch('validate', this.error)
+
+        return error
       })
     }
+    else {
+      // TODO remove duplicate code
+      // this.isChangedAfterValidation = false
+      this.isValidated = true
+      this.isValid = !error
+      this.error = error
 
-    this.isValidated = true
-    // this.isChangedAfterValidation = false
-    this.isValid = !error
-    this.error = error
+      this._events.dispatch('validate', this.error)
 
-    this._events.dispatch('validate', this.error)
+      return error
+    }
+  }
 
-    return error
-  }, 200)
+  debounceValidate = debounce(this.validate, 200)
 
   set(value) {
     if (value !== this.value) {
