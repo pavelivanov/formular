@@ -1,4 +1,4 @@
-import Formx from '../../src/Formx'
+import Formx from '../../src'
 import createForm from './createForm'
 
 

@@ -17,19 +17,19 @@ describe('Form', () => {
     })
   })
 
-  it('should be valid at start', () => {
+  it('should be valid at start', async () => {
 
-    const isValid1 = validForm.validate()
+    const isValid1 = await validForm.validate()
 
     assert.isTrue(isValid1)
 
   })
 
-  it('should fail on wrong address', () => {
+  it('should fail on wrong address', async () => {
 
     validForm.fields.address.set('Wrong address # $')
 
-    const isValid2 = validForm.validate()
+    const isValid2 = await validForm.validate()
 
     assert.isFalse(isValid2)
 
