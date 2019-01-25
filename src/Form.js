@@ -110,26 +110,24 @@ class Form {
   }
 
   async validate() {
-    const fieldNames  = Object.keys(this)
-    const errors      = await Promise.all(fieldNames.map((fieldName) => this[fieldName].validate()))
+    const promises  = Object.keys(this.fields).map((fieldName) => this.fields[fieldName].validate())
+    const errors    = await Promise.all(promises)
 
     this.isValid = errors.every((error) => !error)
 
-    return isValid
+    return this.isValid
   }
 
   async submit() {
-    const isValid = await this.validate()
+    await this.validate()
 
-    if (!isValid) {
+    if (!this.isValid) {
       const errors = this.getErrors()
 
       return Promise.reject(errors)
     }
 
-    const values = this.getValues()
-
-    return values
+    return this.getValues()
   }
 
   on(eventName, handler) {

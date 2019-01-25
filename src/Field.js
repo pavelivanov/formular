@@ -10,16 +10,25 @@ class Field {
    * @param {Object|Array} opts - can be object opts or list of validators
    */
   constructor(name, opts) {
-    this.name                       = name
-    this.value                      = opts.value === undefined || opts.value === null ? '' : opts.value
-    this.initialValue               = this.value
-    this.error                      = null
-    this.isChanged                  = false
-    this.isValidated                = false
-    this.isValid                    = true
+    this._events              = new Events()
 
-    this._events                    = new Events()
-    this._validators                = opts.validate || opts
+    this.name                 = name
+    this.validators           = opts.validate || opts
+    this.value                = opts.value === undefined || opts.value === null ? '' : opts.value
+    this.initialValue         = this.value
+    this.error                = null
+    this.isChanged            = false
+    this.isValidated          = false
+    this.isValid              = true
+    this.cancelablePromise    = null
+    this.hasAsyncValidators   = true
+
+    // TODO how to detect this?
+    // this.hasAsyncValidators = this.validators.some((validator) => (
+    //   validator.constructor.name === 'AsyncFunction'
+    // ))
+
+    this.debounceValidate = this.hasAsyncValidators ? debounce(this.validate, 120) : this.validate
   }
 
   setInitialValue(value) {
@@ -52,20 +61,37 @@ class Field {
 
     this._events.dispatch('start validate')
 
-    if (this._validators && this._validators.length) {
-      if (this.cancelablePromise) {
-        this.cancelablePromise.cancel()
-      }
+    if (this.validators && this.validators.length) {
+      if (this.hasAsyncValidators) {
+        if (this.cancelablePromise) {
+          this.cancelablePromise.cancel()
+        }
 
-      this.cancelablePromise = new CancelablePromise(async (resolve) => {
-        await asyncSome(this._validators, async (validator) => {
-          error = await validator(this.value) // error here is String error message
+        this.cancelablePromise = new CancelablePromise(async (resolve) => {
+          await asyncSome(this.validators, async (validator) => {
+            error = await validator(this.value) // error here is String error message
+            return Boolean(error)
+          })
+          resolve()
+        })
+
+        return this.cancelablePromise.then(() => {
+          this.isValidated = true
+          this.isValid = !error
+          this.error = error
+
+          this._events.dispatch('validate', this.error)
+
+          return error
+        })
+      }
+      else {
+        // TODO write tests for validators with async and plain methods
+        this.validators.some((validator) => {
+          error = validator(this.value) // error here is String error message
           return Boolean(error)
         })
-        resolve()
-      })
 
-      return this.cancelablePromise.then(() => {
         this.isValidated = true
         this.isValid = !error
         this.error = error
@@ -73,7 +99,7 @@ class Field {
         this._events.dispatch('validate', this.error)
 
         return error
-      })
+      }
     }
     else {
       // TODO remove duplicate code
@@ -86,8 +112,6 @@ class Field {
       return error
     }
   }
-
-  debounceValidate = debounce(this.validate, 200)
 
   on(eventName, handler) {
     this._events.subscribe(eventName, handler)

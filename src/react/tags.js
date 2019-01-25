@@ -63,17 +63,11 @@ class Input extends PureComponent {
     const value = event.target.value
 
     field.set(value)
-    field.debounceValidate() // TODO test this
+    await field.debounceValidate()
 
     this.setState({
       value,
     })
-  }
-
-  handleBlur = async () => {
-    const { field } = this.props
-
-    await field.validate()
   }
 
   render() {
@@ -86,7 +80,6 @@ class Input extends PureComponent {
         type="text"
         value={value}
         onChange={this.handleInputChange}
-        onBlur={this.handleBlur}
       />
     )
   }
