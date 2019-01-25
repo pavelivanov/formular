@@ -1,8 +1,12 @@
-import Fields from './Fields'
 import Events from './Events'
+import Field from './Field'
 
 
 class Form {
+
+  static defaultOptions = {
+    initialValues: {},
+  }
 
   /**
    *
@@ -11,18 +15,29 @@ class Form {
    * @param {Function} options.initialValues
    */
   constructor(options) {
-    this.initialOptions = options
-    this.isChanged = false // TODO connect to Field
-    this.isValid = null
-
     this._events = new Events()
 
-    this.setup(options)
+    this.opts       = { ...Form.defaultOptions, ...options }
+    this.fields     = {}
+    this.isChanged  = false // TODO connect to Field
+    this.isValid    = true
+
+    this.setupFields()
   }
 
-  setup(options) {
-    this.fields   = new Fields(this, options.fields, options.initialValues)
-    this.isValid  = true
+  setupFields() {
+    Object.keys(this.opts.fields).forEach((fieldName) => {
+      const fieldOpts     = this.opts.fields[fieldName]
+      const initialValue  = this.opts.initialValues[fieldName]
+
+      // TODO if we should move this into Field
+      if (initialValue !== undefined) {
+        fieldOpts.initialValue = initialValue
+        fieldOpts.value = initialValue
+      }
+
+      this.fields[fieldName] = new Field(fieldName, fieldOpts)
+    })
   }
 
   /**
@@ -30,9 +45,17 @@ class Form {
    * @param {Object} values
    */
   setInitialValues(values) {
-    this.initialOptions.initialValues = values
+    this.opts.initialValues = values
 
-    this.fields.setValues(values)
+    // TODO should we be able to update initialValues w/o changing current values? (for example for resetting to these values)
+    Object.keys(values).map((fieldName) => {
+      const value = values[fieldName]
+      const field = this.fields[fieldName]
+
+      if (field) {
+        return field.setInitialValue(value)
+      }
+    })
   }
 
   /**
@@ -40,14 +63,21 @@ class Form {
    * @param {Object} values
    */
   setValues(values) {
-    return this.fields.setValues(values)
+    // TODO should we mark form as changed and validate it?
+    Object.keys(values).map((fieldName) => {
+      const value = values[fieldName]
+      const field = this.fields[fieldName]
+
+      if (field) {
+        return field.set(value)
+      }
+    })
   }
 
   getValues() {
-    const fieldNames = Object.keys(this.fields)
     const values = {}
 
-    fieldNames.forEach((fieldName) => {
+    Object.keys(this.fields).forEach((fieldName) => {
       const field = this.fields[fieldName]
 
       values[fieldName] = field.value
@@ -57,23 +87,20 @@ class Form {
   }
 
   unsetValues() {
-    const fieldNames = Object.keys(this.fields)
-
     this.isChanged = false
     this.isValid = null
 
-    fieldNames.map((fieldName) => {
+    Object.keys(this.fields).forEach((fieldName) => {
       const field = this.fields[fieldName]
 
-      return field.unset()
+      field.unset()
     })
   }
 
   getErrors() {
-    const fieldNames = Object.keys(this.fields)
     const errors = {}
 
-    fieldNames.forEach((fieldName) => {
+    Object.keys(this.fields).forEach((fieldName) => {
       const field = this.fields[fieldName]
 
       errors[fieldName] = field.error
@@ -83,9 +110,12 @@ class Form {
   }
 
   async validate() {
-    this.isValid = await this.fields.validate()
+    const fieldNames  = Object.keys(this)
+    const errors      = await Promise.all(fieldNames.map((fieldName) => this[fieldName].validate()))
 
-    return this.isValid
+    this.isValid = errors.every((error) => !error)
+
+    return isValid
   }
 
   async submit() {
@@ -100,13 +130,6 @@ class Form {
     const values = this.getValues()
 
     return values
-  }
-
-  reset() {
-    this.fields.destroy()
-    this.setup(this.initialOptions)
-
-    return this
   }
 
   on(eventName, handler) {

@@ -20,27 +20,25 @@
   "license": "ISC",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha --require @babel/register --require ./test/_bootstrap.js ./test/*.spec.js",
+    "test": "jest --bail --colors",
     "dev": "babel ./src --out-dir ./lib --watch",
     "build": "babel ./src --out-dir ./lib"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.0",
+    "@babel/cli": "~7.2.0",
     "@babel/core": "7.2.0",
-    "@babel/node": "^7.2.0",
-    "@babel/plugin-proposal-class-properties": "^7.2.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.2.0",
-    "@babel/plugin-transform-classes": "^7.2.0",
-    "@babel/plugin-transform-destructuring": "^7.2.0",
-    "@babel/plugin-transform-runtime": "^7.2.0",
-    "@babel/preset-env": "^7.2.0",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/register": "^7.0.0",
-    "chai": "^4.2.0",
-    "mocha": "^5.2.0"
+    "@babel/plugin-proposal-class-properties": "~7.2.1",
+    "@babel/plugin-proposal-object-rest-spread": "~7.2.0",
+    "@babel/plugin-transform-classes": "~7.2.0",
+    "@babel/plugin-transform-destructuring": "~7.2.0",
+    "@babel/plugin-transform-runtime": "~7.2.0",
+    "@babel/preset-env": "~7.2.0",
+    "@babel/preset-react": "~7.0.0",
+    "@babel/register": "~7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "jest": "~23.6.0"
   },
   "dependencies": {
-    "@babel/runtime": "^7.2.0",
-    "cancelable-promise": "^2.4.1"
+    "@babel/runtime": "~7.2.0"
   }
 }

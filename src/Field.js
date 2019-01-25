@@ -1,38 +1,53 @@
-import CancelablePromise from 'cancelable-promise'
-
 import Events from './Events'
-import { asyncSome, debounce } from './util'
+import { asyncSome, debounce, CancelablePromise } from './util'
 
 
 class Field {
 
   /**
    *
-   * @param form
    * @param name
    * @param {Object|Array} opts - can be object opts or list of validators
    */
-  constructor(form, name, opts) {
-    this.form                       = form
+  constructor(name, opts) {
     this.name                       = name
     this.value                      = opts.value === undefined || opts.value === null ? '' : opts.value
     this.initialValue               = this.value
     this.error                      = null
     this.isChanged                  = false
     this.isValidated                = false
-    // this.isChangedAfterValidation   = false
     this.isValid                    = true
 
     this._events                    = new Events()
     this._validators                = opts.validate || opts
   }
 
-  validate = async () => {
-    // if field value not changed from previous validation then return previous validation result
-    // if (this.isValidated && !this.isChangedAfterValidation) {
-    //   return this.error
-    // }
+  setInitialValue(value) {
+    this.initialValue = value
+    // TODO we should call "change" event to update view... but looks like we don't need to call validation there...
+    this.set(value)
+  }
 
+  set(value) {
+    if (value !== this.value) {
+      this.value = value
+      this.isChanged = true
+
+      this._events.dispatch('change', this.value)
+    }
+  }
+
+  unset() {
+    this.value        = this.initialValue
+    this.error        = null
+    this.isChanged    = false
+    this.isValidated  = false
+    this.isValid      = true
+
+    this._events.dispatch('change', this.value)
+  }
+
+  validate = async () => {
     let error
 
     this._events.dispatch('start validate')
@@ -51,7 +66,6 @@ class Field {
       })
 
       return this.cancelablePromise.then(() => {
-        // this.isChangedAfterValidation = false
         this.isValidated = true
         this.isValid = !error
         this.error = error
@@ -63,7 +77,6 @@ class Field {
     }
     else {
       // TODO remove duplicate code
-      // this.isChangedAfterValidation = false
       this.isValidated = true
       this.isValid = !error
       this.error = error
@@ -75,33 +88,6 @@ class Field {
   }
 
   debounceValidate = debounce(this.validate, 200)
-
-  set(value) {
-    if (value !== this.value) {
-      this.value = value
-      this.isChanged = true
-
-      this._events.dispatch('change', this.value)
-
-      // if field has already been validated then validate it on every change
-      // if (this.isValidated) {
-      //   this.isChangedAfterValidation = true
-      //
-      //   this.validate()
-      // }
-    }
-  }
-
-  unset() {
-    this.value                      = this.initialValue
-    this.error                      = null
-    this.isChanged                  = false
-    this.isValidated                = false
-    // this.isChangedAfterValidation   = false
-    this.isValid                    = true
-
-    this._events.dispatch('change', this.value)
-  }
 
   on(eventName, handler) {
     this._events.subscribe(eventName, handler)
