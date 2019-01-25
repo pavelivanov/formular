@@ -1,6 +1,5 @@
-import React, { Component } from 'react'
+import React, { Fragment, Component } from 'react'
 import { FormxGroup } from 'formx'
-import { connect } from 'formx/react'
 import { shipping, billing, creditCard } from '../../forms'
 
 import PaymentMethods from './PaymentMethods'
@@ -10,30 +9,34 @@ import CreditCardForm from './CreditCardForm'
 
 
 const getFormsGroup = (isSameAddress, paymentMethod) => {
+  let forms
+
   if (paymentMethod === 'payPal') {
-    return {
+    forms = {
       shipping,
     }
   }
-
-  if (isSameAddress) {
-    return {
+  else if (isSameAddress) {
+    forms = {
       shipping,
       creditCard,
     }
   }
-
-  return {
-    shipping,
-    billing,
-    creditCard,
+  else {
+    forms = {
+      shipping,
+      billing,
+      creditCard,
+    }
   }
+
+  return new FormxGroup(forms)
 }
 
-const formGroup = new FormxGroup({})
+let formGroup = new FormxGroup({})
 
 
-class PaymentPage extends Component {
+export default class PaymentPage extends Component {
 
   constructor() {
     super()
@@ -46,7 +49,7 @@ class PaymentPage extends Component {
       paymentMethod,
     }
 
-    formGroup.replace(getFormsGroup(sameAddress, paymentMethod))
+    formGroup = getFormsGroup(sameAddress, paymentMethod)
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -54,7 +57,7 @@ class PaymentPage extends Component {
     const { sameAddress: newSameAddress, paymentMethod: newPaymentMethod } = nextState
 
     if (sameAddress !== newSameAddress || paymentMethod !== newPaymentMethod) {
-      formGroup.replace(getFormsGroup(newSameAddress, newPaymentMethod))
+      formGroup = getFormsGroup(newSameAddress, newPaymentMethod)
     }
   }
 
@@ -113,67 +116,55 @@ class PaymentPage extends Component {
         console.log('values', values)
       }, (errors) => {
         console.log('errors', errors)
+        this.forceUpdate()
       })
   }
 
-  /*
-
-    1)  setState добавлен в каждый Field, т.е. поля независимы от родителей и обновляются сами.
-        выходит что когда мы делаем form.setValues(), form.unsetValues(), etc нам не нужно заботиться о рендере родителя
-
-    2)  на прмиере sameAddress - в данном компоненте нам нужно изменять UI состояние чекбокса, поэтому имеет место быть
-        ререндер, но также мы изменяем formGroup. Здесь же добавлен connect, который при изменении formGroup вызывает
-        ререндер. Выходит что при изменении sameAddress ререндер вызывается дважды...
-
-   */
-
   render() {
     const { sameAddress, paymentMethod } = this.state
-    const { forms: { shipping, billing, creditCard } } = formGroup
 
-    console.log(444, formGroup)
+    console.log('render() sameAddress: ', sameAddress)
+    console.log('render() paymentMethod: ', paymentMethod)
 
     return (
-      <form className="form" onSubmit={this.handleSubmit}>
-        <div className="col col-6">
-          <button type="button" onClick={this.setInitialValues}>Set initial values to all forms</button><br /><br />
+      <div className="content">
+        <div className="inlineItems">
+          <div>
+            <button type="button" onClick={this.setInitialValues}>Set initial values to all forms</button><br /><br />
+          </div>
+          <div>
+            <button type="button" onClick={this.clearFormsValues}>Clear forms values</button><br /><br />
+          </div>
+          <div>
+            <button type="button" onClick={this.clearCreditCardFields}>Clear credit card fields</button>
+          </div>
         </div>
-        <div className="col col-6">
-          <button type="button" onClick={this.clearFormsValues}>Clear forms values</button><br /><br />
-        </div>
-        <div className="col col-12">
-          <button type="button" onClick={this.clearCreditCardFields}>Clear credit card fields</button>
-        </div>
-
-        <hr />
-
-        <PaymentMethods onChange={this.handleChangePaymentMethod} />
-        <ShippingForm className="formSection" fields={shipping.fields} />
-        {
-          paymentMethod === 'creditCard' && (
-            <div className="formSection">
-              <label>
-                <input type="checkbox" checked={sameAddress} onChange={this.handleChangeSameAddress} />
-                Same address
-              </label>
-            </div>
-          )
-        }
-        {
-          billing && (
-            <BillingForm className="formSection" fields={billing.fields} />
-          )
-        }
-        {
-          creditCard && (
-            <CreditCardForm className="formSection" fields={creditCard.fields} />
-          )
-        }
-        <button className="submitButton" type="submit">Submit</button>
-      </form>
+        <form className="form" onSubmit={this.handleSubmit}>
+          <PaymentMethods onChange={this.handleChangePaymentMethod} />
+          <ShippingForm className="formSection" fields={shipping.fields} />
+          {
+            paymentMethod === 'creditCard' && (
+              <div className="formSection">
+                <label>
+                  <input type="checkbox" checked={sameAddress} onChange={this.handleChangeSameAddress} />
+                  Same address
+                </label>
+              </div>
+            )
+          }
+          {
+            billing && (
+              <BillingForm className="formSection" fields={billing.fields} />
+            )
+          }
+          {
+            creditCard && (
+              <CreditCardForm className="formSection" fields={creditCard.fields} />
+            )
+          }
+          <button className="submitButton" type="submit">Submit</button>
+        </form>
+      </div>
     )
   }
 }
-
-
-export default connect(formGroup)(PaymentPage)

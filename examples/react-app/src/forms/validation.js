@@ -113,11 +113,7 @@ const asyncValidation = (isValid) =>
   })
 
 export const successAsyncValidation = async () => {
-  console.log(333)
-
   const isValid = await asyncValidation(true)
-
-  console.log(444)
 
   if (!isValid) {
     return 'Async validation failed'

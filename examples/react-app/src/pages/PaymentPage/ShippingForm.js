@@ -7,4 +7,5 @@ const ShippingForm = (props) => (
   <AddressForm {...props} withTelephone />
 )
 
+
 export default ShippingForm

@@ -18,6 +18,10 @@ button {
   outline: none;
 }
 
+button:active {
+  background-color: #e4e4e4;
+}
+
 
 .row {
   margin: -4px;
