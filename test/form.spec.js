@@ -110,37 +110,7 @@ describe('form', () => {
 
   })
 
-  xdescribe('values', () => {
-
-    let form
-
-    beforeEach(() => {
-      form = new Formx({
-        fields: {
-          address: [],
-          telephone: [],
-        },
-      })
-    })
-
-    xit('setInitialValues() should not override existing values', () => {
-      const existingValues = {
-        address: 'Los Angeles',
-        telephone: '',
-      }
-
-      form.setValues(existingValues)
-
-      form.setInitialValues({
-        address: 'New York',
-      })
-
-      expect(form.getValues()).toEqual(existingValues)
-    })
-
-  })
-
-  xdescribe('validation', () => {
+  describe('validation', () => {
 
     let form
 
@@ -170,21 +140,21 @@ describe('form', () => {
     })
 
     it('should validate one field', async () => {
-      const isValid = await form.address.validate()
+      const error1 = await form.fields.address.validate()
 
-      expect(isValid).toBe(true)
+      expect(error1).toBe(undefined)
 
       form.fields.address.set('Wrong address # $')
 
-      const isValid2 = await form.address.validate()
+      const error2 = await form.fields.address.validate()
 
-      expect(isValid2).toBe(false)
+      expect(error2).toBe('Must be a valid street address')
     })
 
   })
 })
 
-xdescribe('form group', () => {
+describe('form group', () => {
 
   let formGroup
 
@@ -199,7 +169,6 @@ xdescribe('form group', () => {
     const billingForm = new Formx({
       fields: {
         address: [ required, streetAddress ],
-        telephone: [ telephone ],
       },
     })
 
@@ -214,6 +183,37 @@ xdescribe('form group', () => {
       billing: billingForm,
       creditCard: creditCardForm,
     })
+  })
+
+  it('set values', () => {
+    const values = {
+      shipping: {
+        address: 'Los Angeles',
+      },
+      creditCard: {
+        cardNumber: '4242424242424242',
+      },
+    }
+
+    const expectedValues = {
+      billing: {
+        address: '',
+      },
+      shipping: {
+        address: 'Los Angeles',
+        telephone: '',
+      },
+      creditCard: {
+        cardNumber: '4242424242424242',
+      },
+    }
+
+    formGroup.setValues(values)
+
+    expect(formGroup.getValues()).toEqual(expectedValues)
+    expect(formGroup.forms.shipping.getValues()).toEqual(expectedValues.shipping)
+    expect(formGroup.forms.billing.getValues()).toEqual(expectedValues.billing)
+    expect(formGroup.forms.creditCard.getValues()).toEqual(expectedValues.creditCard)
   })
 
 })

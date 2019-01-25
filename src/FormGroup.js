@@ -69,13 +69,15 @@ class FormGroup {
   }
 
   setValues(values) {
-    const formNames = Object.keys(values)
+    const formNames = Object.keys(this.forms)
 
-    formNames.map((formName) => {
-      const form = this.forms[formName]
-      const formValues = values[formName]
+    formNames.forEach((formName) => {
+      const form        = this.forms[formName]
+      const formValues  = values[formName]
 
-      return form.setValues(formValues)
+      if (formValues) {
+        form.setValues(formValues)
+      }
     })
 
     this._events.dispatch('set values')
@@ -97,10 +99,10 @@ class FormGroup {
   unsetValues() {
     const formNames = Object.keys(this.forms)
 
-    formNames.map((formName) => {
+    formNames.forEach((formName) => {
       const form = this.forms[formName]
 
-      return form.unsetValues()
+      form.unsetValues()
     })
 
     this._events.dispatch('unset values')

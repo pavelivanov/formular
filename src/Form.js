@@ -64,12 +64,12 @@ class Form {
    */
   setValues(values) {
     // TODO should we mark form as changed and validate it?
-    Object.keys(values).map((fieldName) => {
+    Object.keys(this.fields).forEach((fieldName) => {
       const value = values[fieldName]
       const field = this.fields[fieldName]
 
-      if (field) {
-        return field.set(value)
+      if (typeof value !== 'undefined') {
+        field.set(value)
       }
     })
   }
