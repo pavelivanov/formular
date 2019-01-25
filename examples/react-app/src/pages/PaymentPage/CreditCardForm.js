@@ -4,7 +4,7 @@ import Field from '../../components/Field'
 
 
 const CreditCardForm = ({ className, fields }) => (
-  <div className={className}>
+  <div className={`row ${className}`}>
     <div className="col col-12">
       <Field field={fields.cardNumber} placeholder="Card number" />
     </div>

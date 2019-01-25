@@ -33,8 +33,6 @@ const getFormsGroup = (isSameAddress, paymentMethod) => {
   return new FormxGroup(forms)
 }
 
-let formGroup = new FormxGroup({})
-
 
 export default class PaymentPage extends Component {
 
@@ -49,7 +47,7 @@ export default class PaymentPage extends Component {
       paymentMethod,
     }
 
-    formGroup = getFormsGroup(sameAddress, paymentMethod)
+    this.formGroup = getFormsGroup(sameAddress, paymentMethod)
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -57,12 +55,12 @@ export default class PaymentPage extends Component {
     const { sameAddress: newSameAddress, paymentMethod: newPaymentMethod } = nextState
 
     if (sameAddress !== newSameAddress || paymentMethod !== newPaymentMethod) {
-      formGroup = getFormsGroup(newSameAddress, newPaymentMethod)
+      this.formGroup = getFormsGroup(newSameAddress, newPaymentMethod)
     }
   }
 
   setInitialValues = () => {
-    formGroup.setValues({
+    this.formGroup.setValues({
       shipping: {
         firstName: 'foo',
         lastName: 'bar',
@@ -89,11 +87,11 @@ export default class PaymentPage extends Component {
   }
 
   clearFormsValues = () => {
-    formGroup.unsetValues()
+    this.formGroup.unsetValues()
   }
 
   clearCreditCardFields = () => {
-    formGroup.forms.creditCard.unsetValues()
+    this.formGroup.forms.creditCard.unsetValues()
   }
 
   handleChangePaymentMethod = (paymentMethod) => {
@@ -111,20 +109,17 @@ export default class PaymentPage extends Component {
   handleSubmit = (event) => {
     event.preventDefault()
 
-    formGroup.submit()
+    this.formGroup.submit()
       .then((values) => {
         console.log('values', values)
       }, (errors) => {
-        console.log('errors', errors)
+        console.error('errors', errors)
         this.forceUpdate()
       })
   }
 
   render() {
     const { sameAddress, paymentMethod } = this.state
-
-    console.log('render() sameAddress: ', sameAddress)
-    console.log('render() paymentMethod: ', paymentMethod)
 
     return (
       <div className="content">
@@ -153,12 +148,12 @@ export default class PaymentPage extends Component {
             )
           }
           {
-            billing && (
+            this.formGroup.forms.billing && (
               <BillingForm className="formSection" fields={billing.fields} />
             )
           }
           {
-            creditCard && (
+            this.formGroup.forms.creditCard && (
               <CreditCardForm className="formSection" fields={creditCard.fields} />
             )
           }

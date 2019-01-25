@@ -119,6 +119,7 @@ class Form {
   }
 
   async submit() {
+    // TODO don't validate if all fields are changed and valid
     await this.validate()
 
     if (!this.isValid) {
