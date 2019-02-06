@@ -1,60 +1,60 @@
-import React, { Component } from 'react'
+import React, { useReducer } from 'react'
+import PropTypes from 'prop-types'
 import { Input } from 'formx/react/tags'
 
 
-export default class Field extends Component {
+const Field = ({ field, placeholder, readOnly }) => {
+  const [ state, setState ] = useReducer(
+    (state, newState) => ({ ...state, ...newState }),
+    { isValidationProcess: false, error: field.error || null }
+  )
 
-  constructor(props) {
-    super()
+  const { isValidationProcess, error } = state
 
-    const { field } = props
-
-    this.state = {
-      isValidationProcess: false,
-      error: field.error || null,
-    }
-  }
-
-  handleStartValidate = () => {
-    this.setState({
+  const handleStartValidate = () => {
+    setState({
       isValidationProcess: true,
     })
   }
 
-  handleValidate = (error) => {
-    this.setState({
+  const handleValidate = (error) => {
+    setState({
       isValidationProcess: false,
       error,
     })
   }
 
-  render() {
-    const { isValidationProcess, error } = this.state
-    const { field, placeholder, readOnly } = this.props
-
-    return (
-      <div className="field">
-        <div className="inputRelativeWrapper">
-          {
-            isValidationProcess && (
-              <div className="spinner" />
-            )
-          }
-          <Input
-            className={error ? 'withError' : ''}
-            field={field}
-            placeholder={placeholder}
-            onStartValidate={this.handleStartValidate}
-            onValidate={this.handleValidate}
-            readOnly={readOnly}
-          />
-        </div>
+  return (
+    <div className="field">
+      <div className="inputRelativeWrapper">
         {
-          Boolean(error) && (
-            <span className="error">{error}</span>
+          isValidationProcess && (
+            <div className="spinner" />
           )
         }
+        <Input
+          className={error ? 'withError' : ''}
+          field={field}
+          placeholder={placeholder}
+          onStartValidate={handleStartValidate}
+          onValidate={handleValidate}
+          readOnly={readOnly}
+        />
       </div>
-    )
-  }
+      {
+        Boolean(error) && (
+          <span className="error">{error}</span>
+        )
+      }
+    </div>
+  )
 }
+
+Field.propTypes = {
+  field: PropTypes.object.isRequired,
+  placeholder: PropTypes.string,
+  readOnly: PropTypes.bool,
+}
+
+
+export default Field
