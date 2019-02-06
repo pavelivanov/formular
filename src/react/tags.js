@@ -1,82 +1,59 @@
-import React, { PureComponent } from 'react'
+import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 
-class Input extends PureComponent {
+const Input = ({ field, onStartValidate, onValidate, ...rest }) => {
+  const [ value, setValue ] = useState(field.value || '')
 
-  static propTypes = {
-    field: PropTypes.object.isRequired,
-    value: PropTypes.string,
-    onValidate: PropTypes.func,
-  }
-
-  constructor(props) {
-    super()
-
-    const { field: { value } } = props
-
-    this.state = {
-      value: value || '',
+  useEffect(() => {
+    field.on('start validate', handleFieldStartValidate)
+    field.on('validate', handleFieldValidate)
+    field.on('change', handleFieldChange)
+    
+    return () => {
+      field.off('start validate', handleFieldStartValidate)
+      field.off('validate', handleFieldValidate)
+      field.off('change', handleFieldChange)
     }
-  }
+  })
 
-  componentWillMount() {
-    const { field } = this.props
-
-    field.on('start validate', this.handleFieldStartValidate)
-    field.on('validate', this.handleFieldValidate)
-    field.on('change', this.handleFieldChange)
-  }
-
-  componentWillUnmount() {
-    const { field } = this.props
-
-    field.off('start validate', this.handleFieldStartValidate)
-    field.off('validate', this.handleFieldValidate)
-    field.off('change', this.handleFieldChange)
-  }
-
-  handleFieldStartValidate = () => {
-    const { onStartValidate } = this.props
-
+  const handleFieldStartValidate = () => {
     if (typeof onStartValidate === 'function') {
       onStartValidate()
     }
   }
 
-  handleFieldValidate = (error) => {
-    const { onValidate } = this.props
-
+  const handleFieldValidate = (error) => {
     if (typeof onValidate === 'function') {
       onValidate(error)
     }
   }
 
-  handleFieldChange = () => {
-    this.forceUpdate()
+  const handleFieldChange = (value) => {
+    setValue(value)
   }
 
-  handleInputChange = (event) => {
-    const { field } = this.props
+  const handleInputChange = (event) => {
     const value = event.target.value
 
     field.set(value)
     field.debounceValidate()
   }
 
-  render() {
-    const { value } = this.state
-    const { field, onStartValidate, onValidate, ...rest } = this.props
+  return (
+    <input
+      type="text"
+      {...rest}
+      value={value}
+      onChange={handleInputChange}
+    />
+  )
+}
 
-    return (
-      <input
-        type="text"
-        {...rest}
-        value={field.value}
-        onChange={this.handleInputChange}
-      />
-    )
-  }
+Input.propTypes = {
+  field: PropTypes.object.isRequired,
+  value: PropTypes.string,
+  onValidate: PropTypes.func,
 }
 
 

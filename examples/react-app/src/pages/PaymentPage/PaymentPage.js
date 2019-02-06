@@ -1,4 +1,4 @@
-import React, { Fragment, Component, useReducer, useEffect } from 'react'
+import React, { useReducer, useEffect } from 'react'
 import { FormxGroup } from 'formx'
 import { shipping, billing, creditCard } from '../../forms'
 
@@ -34,7 +34,6 @@ const getFormsGroup = (isSameAddress, paymentMethod) => {
 }
 
 let formGroup
-
 
 
 const setInitialValues = () => {
