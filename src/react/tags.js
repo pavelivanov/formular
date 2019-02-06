@@ -5,17 +5,18 @@ import PropTypes from 'prop-types'
 const Input = ({ field, onStartValidate, onValidate, ...rest }) => {
   const [ value, setValue ] = useState(field.value || '')
 
+  // with second argument [] it works like willMount / willUnmount
   useEffect(() => {
     field.on('start validate', handleFieldStartValidate)
     field.on('validate', handleFieldValidate)
     field.on('change', handleFieldChange)
-    
+
     return () => {
       field.off('start validate', handleFieldStartValidate)
       field.off('validate', handleFieldValidate)
       field.off('change', handleFieldChange)
     }
-  })
+  }, [])
 
   const handleFieldStartValidate = () => {
     if (typeof onStartValidate === 'function') {
