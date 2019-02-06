@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import Field from '../../components/Field'
 
@@ -19,6 +20,10 @@ const CreditCardForm = ({ className, fields }) => (
     </div>
   </div>
 )
+
+CreditCardForm.propTypes = {
+  fields: PropTypes.object.isRequired,
+}
 
 
 export default CreditCardForm

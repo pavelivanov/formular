@@ -99,9 +99,9 @@ const PaymentPage = () => {
     })
   }
 
-  const handleChangeSameAddress = (isSameAddress) => {
+  const handleChangeSameAddress = (event) => {
     setState({
-      isSameAddress,
+      isSameAddress: event.target.checked,
     })
   }
 
@@ -119,7 +119,7 @@ const PaymentPage = () => {
         </div>
       </div>
       <form className="form" onSubmit={handleSubmit}>
-        <PaymentMethods onChange={handleChangePaymentMethod} />
+        <PaymentMethods value={paymentMethod} onChange={handleChangePaymentMethod} />
         <ShippingForm className="formSection" fields={shipping.fields} />
         {
           paymentMethod === 'creditCard' && (

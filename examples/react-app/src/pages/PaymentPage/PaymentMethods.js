@@ -1,40 +1,23 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import { RadioGroup, Radio } from 'react-radio-group'
 
 
-class PaymentMethods extends PureComponent {
+const PaymentMethods = ({ value, onChange }) => (
+  <RadioGroup name="paymentMethod" selectedValue={value} onChange={onChange}>
+    <label>
+      <Radio value="creditCard" />Credit card
+    </label>
+    <label>
+      <Radio value="payPal" />PayPal
+    </label>
+  </RadioGroup>
+)
 
-  state = {
-    paymentMethod: 'creditCard',
-  }
-
-  handleChange = (paymentMethod) => {
-    const { onChange } = this.props
-
-    this.setState({
-      paymentMethod,
-    }, () => {
-      onChange(paymentMethod)
-    })
-  }
-
-  render() {
-    const { paymentMethod } = this.state
-    const { className } = this.props
-
-    return (
-      <div className={className}>
-        <RadioGroup name="paymentMethod" selectedValue={paymentMethod} onChange={this.handleChange}>
-          <label>
-            <Radio value="creditCard" />Credit card
-          </label>
-          <label>
-            <Radio value="payPal" />PayPal
-          </label>
-        </RadioGroup>
-      </div>
-    )
-  }
+PaymentMethods.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 }
+
 
 export default PaymentMethods
