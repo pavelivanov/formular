@@ -21,14 +21,14 @@ class Field {
     this.isValidated          = false
     this.isValid              = true
     this.cancelablePromise    = null
-    this.hasAsyncValidators   = true
+    this.hasAsyncValidators   = opts.hasAsyncValidators
 
     // TODO how to detect this?
     // this.hasAsyncValidators = this.validators.some((validator) => (
     //   validator.constructor.name === 'AsyncFunction'
     // ))
 
-    this.debounceValidate = this.hasAsyncValidators ? debounce(this.validate, 120) : this.validate
+    this.debounceValidate = this.hasAsyncValidators ? debounce(this.validate, 90) : this.validate
   }
 
   setInitialValue(value) {

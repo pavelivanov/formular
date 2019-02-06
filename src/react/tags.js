@@ -52,22 +52,16 @@ class Input extends PureComponent {
     }
   }
 
-  handleFieldChange = (value) => {
-    this.setState({
-      value,
-    })
+  handleFieldChange = () => {
+    this.forceUpdate()
   }
 
-  handleInputChange = async (event) => {
+  handleInputChange = (event) => {
     const { field } = this.props
     const value = event.target.value
 
     field.set(value)
-    await field.debounceValidate()
-
-    this.setState({
-      value,
-    })
+    field.debounceValidate()
   }
 
   render() {
@@ -76,9 +70,9 @@ class Input extends PureComponent {
 
     return (
       <input
-        {...rest}
         type="text"
-        value={value}
+        {...rest}
+        value={field.value}
         onChange={this.handleInputChange}
       />
     )

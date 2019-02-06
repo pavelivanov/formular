@@ -6,7 +6,10 @@ const billingForm = new Formx({
   fields: {
     firstName: [ required ],
     lastName: [ required ],
-    street: [ required, streetAddress ],
+    street: {
+      validate: [ required, streetAddress ],
+      hasAsyncValidators: true,
+    },
     apt: [],
     zipCode: [ required, zipCode ],
     city: [ required, minLength(3) ],

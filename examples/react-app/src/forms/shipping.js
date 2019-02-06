@@ -6,7 +6,10 @@ const shippingForm = new Formx({
   fields: {
     firstName: [ required ],
     lastName: [ required ],
-    street: [ required, successAsyncValidation, streetAddress ],
+    street: {
+      validate: [ required, successAsyncValidation, streetAddress ],
+      hasAsyncValidators: true,
+    },
     apt: [],
     zipCode: [ required, zipCode ],
     city: [ required, minLength(3) ],
