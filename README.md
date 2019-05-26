@@ -4,9 +4,8 @@
 
 ### Form initialization
 
-```
+```js
 import Formx from 'formx'
-
 
 const form = new Formx({
   fields: {
@@ -20,11 +19,10 @@ const form = new Formx({
 })
 ```
 
-### React example
+### In React
 
-```
+```jsx
 import { Input } from 'formx/react/tags'
-
 
 const handleSubmit = () => form.submit()
 
@@ -98,7 +96,7 @@ Unsubscribes `handler` from the event with certain `eventName`.
 
 ### Usage
 
-```
+```js
 const options = {
   validate: [ required, email ],
   value: 'test-email@test.com',
@@ -217,7 +215,7 @@ Unsubscribes `handler` from the event with certain `eventName`.
 
 If you are using several forms and you need to control them in one place you can combine them using `FormGroup`
 
-```
+```js
 import Formx, { FormGroup } from 'formx'
 
 const shippingAddressForm = new Formx({
@@ -238,7 +236,6 @@ const creditCardForm = new Formx({
 })
 
 const formGroup = new FormGroup({ shippingAddressForm, creditCardForm })
-
 ```
 
 ### Properties
