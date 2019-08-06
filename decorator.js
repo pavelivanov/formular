@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Formx from './src'
+import Form from './src'
 
 
 const getForm = (_options, props) => {

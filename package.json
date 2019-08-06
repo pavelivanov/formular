@@ -1,15 +1,15 @@
 {
-  "name": "formx",
-  "version": "1.0.1",
+  "name": "formular",
+  "version": "1.0.0",
   "author": "Pavel Ivanov",
   "description": "Form worker",
-  "homepage": "https://github.com/pavelivanov/formx#readme",
+  "homepage": "https://github.com/pavelivanov/formular#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pavelivanov/formx.git"
+    "url": "git+https://github.com/pavelivanov/formular.git"
   },
   "bugs": {
-    "url": "https://github.com/pavelivanov/formx/issues"
+    "url": "https://github.com/pavelivanov/formular/issues"
   },
   "keywords": [
     "form",
@@ -22,7 +22,8 @@
   "scripts": {
     "test": "jest --bail --colors",
     "dev": "babel ./src --out-dir ./lib --watch",
-    "build": "babel ./src --out-dir ./lib"
+    "build": "babel ./src --out-dir ./lib",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "@babel/cli": "~7.2.0",

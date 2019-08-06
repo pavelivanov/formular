@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react'
 import PropTypes from 'prop-types'
-import { Input } from 'formx/react/tags'
+import { Input } from 'formular/react/tags'
 
 
 const Field = ({ field, placeholder, readOnly }) => {

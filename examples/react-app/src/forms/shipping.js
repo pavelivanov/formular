@@ -1,8 +1,8 @@
-import Formx from 'formx'
+import Form from 'formular'
 import { required, streetAddress, zipCode, telephone, minLength, successAsyncValidation } from './validation'
 
 
-const shippingForm = new Formx({
+const shippingForm = new Form({
   fields: {
     firstName: [ required ],
     lastName: [ required ],

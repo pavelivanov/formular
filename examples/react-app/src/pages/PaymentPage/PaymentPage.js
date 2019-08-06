@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react'
-import { FormxGroup } from 'formx'
+import { FormGroup } from 'formular'
 import { shipping, billing, creditCard } from '../../forms'
 
 import PaymentMethods from './PaymentMethods'
@@ -30,7 +30,7 @@ const getFormsGroup = (isSameAddress, paymentMethod) => {
     }
   }
 
-  return new FormxGroup(forms)
+  return new FormGroup(forms)
 }
 
 let formGroup

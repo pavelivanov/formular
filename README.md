@@ -1,13 +1,13 @@
-# Formx
+# Form
 
 ## Usage
 
 ### Form initialization
 
 ```js
-import Formx from 'formx'
+import Form from 'formular'
 
-const form = new Formx({
+const form = new Form({
   fields: {
     email: {
       validate: [ required, email ],
@@ -22,7 +22,7 @@ const form = new Formx({
 ### In React
 
 ```jsx
-import { Input } from 'formx/react/tags'
+import { Input } from 'formular/react/tags'
 
 const handleSubmit = () => form.submit()
 
@@ -216,9 +216,9 @@ Unsubscribes `handler` from the event with certain `eventName`.
 If you are using several forms and you need to control them in one place you can combine them using `FormGroup`
 
 ```js
-import Formx, { FormGroup } from 'formx'
+import Form, { FormGroup } from 'formular'
 
-const shippingAddressForm = new Formx({
+const shippingAddressForm = new Form({
   fields: {
     zip: [ required ],
     address: [ required ],
@@ -227,7 +227,7 @@ const shippingAddressForm = new Formx({
   },
 })
 
-const creditCardForm = new Formx({
+const creditCardForm = new Form({
   fields: {
     cardNumber: [ required ],
     expDate: [ required ],

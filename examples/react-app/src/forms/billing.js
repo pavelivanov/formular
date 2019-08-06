@@ -1,8 +1,8 @@
-import Formx from 'formx'
+import Form from 'formular'
 import { required, streetAddress, zipCode, minLength } from './validation'
 
 
-const billingForm = new Formx({
+const billingForm = new Form({
   fields: {
     firstName: [ required ],
     lastName: [ required ],

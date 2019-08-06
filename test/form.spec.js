@@ -1,4 +1,4 @@
-import Formx, { FormxGroup } from '../src'
+import Form, { FormGroup } from '../src'
 import { required, streetAddress, telephone } from './util/validation'
 
 
@@ -7,7 +7,7 @@ describe('form', () => {
   describe('initial values', () => {
 
     it('should contain empty initial values on init', () => {
-      const form = new Formx({
+      const form = new Form({
         fields: {
           address: [],
           telephone: [],
@@ -23,7 +23,7 @@ describe('form', () => {
         telephone: '+1 201 123-45-67',
       }
 
-      const form = new Formx({
+      const form = new Form({
         fields: {
           address: [],
           telephone: [],
@@ -40,7 +40,7 @@ describe('form', () => {
         telephone: '+1 201 123-45-67',
       }
 
-      const form = new Formx({
+      const form = new Form({
         fields: {
           address: [],
           telephone: [],
@@ -63,7 +63,7 @@ describe('form', () => {
         telephone: '',
       }
 
-      const form = new Formx({
+      const form = new Form({
         fields: {
           address: [],
           telephone: [],
@@ -91,7 +91,7 @@ describe('form', () => {
         telephone: '',
       }
 
-      const form = new Formx({
+      const form = new Form({
         fields: {
           address: [],
           telephone: [],
@@ -115,7 +115,7 @@ describe('form', () => {
     let form
 
     beforeEach(() => {
-      form = new Formx({
+      form = new Form({
         fields: {
           address: {
             validate: [ required, streetAddress ],
@@ -159,26 +159,26 @@ describe('form group', () => {
   let formGroup
 
   beforeEach(() => {
-    const shippingForm = new Formx({
+    const shippingForm = new Form({
       fields: {
         address: [ required, streetAddress ],
         telephone: [ telephone ],
       },
     })
 
-    const billingForm = new Formx({
+    const billingForm = new Form({
       fields: {
         address: [ required, streetAddress ],
       },
     })
 
-    const creditCardForm = new Formx({
+    const creditCardForm = new Form({
       fields: {
         cardNumber: [ required ],
       },
     })
 
-    formGroup = new FormxGroup({
+    formGroup = new FormGroup({
       shipping: shippingForm,
       billing: billingForm,
       creditCard: creditCardForm,

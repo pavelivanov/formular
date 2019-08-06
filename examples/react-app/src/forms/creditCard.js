@@ -1,8 +1,8 @@
-import Formx from 'formx'
+import Form from 'formular'
 import { required, cardNumber, expDate, cardCVV } from './validation'
 
 
-const creditCardForm = new Formx({
+const creditCardForm = new Form({
   fields: {
     cardNumber: [ required, cardNumber ],
     holderName: [ required ],

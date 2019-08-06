@@ -1,9 +1,10 @@
-import Formx from './Form'
-import FormxGroup from './FormGroup'
+import Form from './Form'
+import FormGroup from './FormGroup'
 
 
-export default Formx
+export default Form
 
 export {
-  FormxGroup,
+  Form,
+  FormGroup,
 }

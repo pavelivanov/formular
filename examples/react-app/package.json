@@ -2,11 +2,11 @@
   "name": "react-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://formx.surge.sh/",
+  "homepage": "http://formular.surge.sh/",
   "scripts": {
-    "copy-formx": "rimraf ./node_modules/formx && cp -r ../../lib ./node_modules/formx",
-    "start": "npm run copy-formx && react-scripts start",
-    "build": "npm run copy-formx && react-scripts build && surge -p ./build -d formx.surge.sh",
+    "copy-formular": "rimraf ./node_modules/formular && cp -r ../../lib ./node_modules/formular",
+    "start": "npm run copy-formular && react-scripts start",
+    "build": "npm run copy-formular && react-scripts build && surge -p ./build -d formular.surge.sh",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
