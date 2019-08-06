@@ -10,14 +10,21 @@ class Form {
 
   /**
    *
-   * @param {Object} options
-   * @param {Object} options.fields
-   * @param {Function} options.initialValues
+   * @param {Object} opts
+   * @param {string} opts.name
+   * @param {Object} opts.fields
+   * @param {Object} [opts.initialValues]
    */
-  constructor(options) {
+  constructor(opts) {
     this._events = new Events()
 
-    this.opts       = { ...Form.defaultOptions, ...options }
+    // protect from passing initialValues: null
+    if (!opts.initialValues) {
+      opts.initialValues = {}
+    }
+
+    this.name       = opts.name
+    this.opts       = { ...Form.defaultOptions, ...opts }
     this.fields     = {}
     this.isChanged  = false // TODO connect to Field
     this.isValid    = true
@@ -27,8 +34,10 @@ class Form {
 
   setupFields() {
     Object.keys(this.opts.fields).forEach((fieldName) => {
-      const fieldOpts     = this.opts.fields[fieldName]
+      let fieldOpts     = this.opts.fields[fieldName]
       const initialValue  = this.opts.initialValues[fieldName]
+
+      fieldOpts = Array.isArray(fieldOpts) ? { validate: fieldOpts } : fieldOpts
 
       // TODO if we should move this into Field
       if (initialValue !== undefined) {
@@ -36,7 +45,17 @@ class Form {
         fieldOpts.value = initialValue
       }
 
-      this.fields[fieldName] = new Field(fieldName, fieldOpts)
+      const field = new Field(fieldName, fieldOpts, this)
+
+      this.fields[fieldName] = field
+
+      field.on('change', () => {
+        this._events.dispatch('change', field)
+      })
+
+      field.on('blur', () => {
+        this._events.dispatch('blur', field)
+      })
     })
   }
 
@@ -59,17 +78,18 @@ class Form {
   }
 
   /**
+   * Update fields with passed values
    *
    * @param {Object} values
    */
   setValues(values) {
     // TODO should we mark form as changed and validate it?
-    Object.keys(this.fields).forEach((fieldName) => {
+    Object.keys(values).forEach((fieldName) => {
       const value = values[fieldName]
       const field = this.fields[fieldName]
 
-      if (typeof value !== 'undefined') {
-        field.set(value)
+      if (field) {
+        field.set(value === undefined || value === null ? '' : value)
       }
     })
   }
