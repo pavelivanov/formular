@@ -54,12 +54,14 @@ class Field {
     this.node = node
 
     if (this.node) {
+      this.node.addEventListener('focus', this.handleFocus)
       this.node.addEventListener('blur', this.handleBlur)
     }
   }
 
   unsetRef() {
     if (this.node) {
+      this.node.removeEventListener('focus', this.handleFocus)
       this.node.removeEventListener('blur', this.handleBlur)
     }
 
@@ -156,6 +158,10 @@ class Field {
   setError = (error) => {
     this.error = error
     this._events.dispatch('validate', this.error)
+  }
+
+  handleFocus = () => {
+    this._events.dispatch('focus')
   }
 
   handleBlur = () => {
