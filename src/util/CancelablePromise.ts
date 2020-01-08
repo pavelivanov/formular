@@ -16,69 +16,81 @@ const handleCallback = (resolve, reject, callback, r) => {
 
 class CancelablePromise {
 
-  static all(iterable) {
+  private _promise: Promise<any>
+  private _canceled: boolean
+
+  static all(iterable: Array<Promise<any>>) {
     return new CancelablePromise((y, n) => {
       Promise.all(iterable).then(y, n)
     })
   }
 
-  static race(iterable) {
+  static race(iterable: Array<Promise<any>>) {
     return new CancelablePromise((y, n) => {
       Promise.race(iterable).then(y, n)
     })
   }
 
-  static reject(value) {
+  static reject(value: any) {
     return new CancelablePromise((y, n) => {
       Promise.reject(value).then(y, n)
     })
   }
 
-  static resolve(value) {
+  static resolve(value: any) {
     return new CancelablePromise((y, n) => {
       Promise.resolve(value).then(y, n)
     })
   }
 
-  constructor(executor) {
+  constructor(executor: (resolve: (value?: any) => void, reject: (reason?: any) => void) => void) {
+    // @ts-ignore
     this._promise = new Promise(executor)
     this._canceled = false
   }
 
-  then(success, error) {
-    const p = new CancelablePromise((resolve, reject) => {
+  then(success?, error?): CancelablePromise {
+    const promise = new CancelablePromise((resolve, reject) => {
       this._promise.then((r) => {
         if (this._canceled) {
-          p.cancel()
+          promise.cancel()
         }
+
         if (success && !this._canceled) {
           handleCallback(resolve, reject, success, r)
-        } else {
+        }
+        else {
           resolve(r)
         }
       }, (r) => {
         if (this._canceled) {
-          p.cancel()
+          promise.cancel()
         }
+
         if (error && !this._canceled) {
           handleCallback(resolve, reject, error, r)
-        } else {
+        }
+        else {
           reject(r)
         }
       })
     })
-    return p
+
+    return promise
   }
 
-  catch(error) {
+  catch(error: Error): object {
     return this.then(undefined, error)
   }
 
-  cancel(errorCallback) {
+  cancel(errorCallback?: Function) {
     this._canceled = true
+
     if (errorCallback) {
+      // @ts-ignore
       this._promise.catch(errorCallback)
     }
+
     return this
   }
 }

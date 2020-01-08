@@ -1,20 +1,17 @@
 class Event {
 
-  /**
-   *
-   * @param {string} name
-   */
-  constructor(name) {
+  name: string
+  handlers: Array<Function>
+
+  constructor(name: string) {
     this.name = name
     this.handlers = []
   }
 
   /**
    * Add handler to current Event
-   *
-   * @param {function} handler
    */
-  addHandler(handler) {
+  addHandler(handler: Function) {
     this.handlers.push(handler.bind({
       unsubscribe: () => {
         this.removeHandler(handler)
@@ -24,22 +21,17 @@ class Event {
 
   /**
    * Remove handler from current Event
-   *
-   * @param {function} handler
-   * @returns {Array.<T>|*}
    */
-  removeHandler(handler) {
+  removeHandler(handler: Function) {
     const handlerIndex = this.handlers.indexOf(handler)
 
-    this.handlers.splice(handlerIndex, 1);
+    this.handlers.splice(handlerIndex, 1)
   }
 
   /**
    * Call all handlers in all priorities of current Event
-   *
-   * @param {...array} eventArgs
    */
-  call(...eventArgs) {
+  call(...eventArgs: Array<any>) {
     this.handlers.forEach((handler) => {
       try {
         handler(...eventArgs)
@@ -53,17 +45,16 @@ class Event {
 
 class EventAggregator {
 
+  events: object
+
   constructor() {
     this.events = {}
   }
 
   /**
    * Get Event by name
-   *
-   * @param {string} name
-   * @returns {*}
    */
-  getEvent(name) {
+  getEvent(name: string): Event {
     let event = this.events[name]
 
     if (!event) {
@@ -74,13 +65,7 @@ class EventAggregator {
     return event
   }
 
-  /**
-   *
-   * @param {string} name
-   * @param {function} handler
-   * @returns {{ event: *, handler: * }}
-   */
-  subscribe(name, handler) {
+  subscribe(name: string, handler: Function): { event: Event, handler: Function } {
     const event = this.getEvent(name)
 
     event.addHandler(handler)
@@ -88,23 +73,13 @@ class EventAggregator {
     return { event, handler }
   }
 
-  /**
-   *
-   * @param {string} eventName
-   * @param {function} handler
-   */
-  unsubscribe(eventName, handler) {
+  unsubscribe(eventName: string, handler: Function) {
     const event = this.getEvent(eventName)
 
     event.removeHandler(handler)
   }
 
-  /**
-   *
-   * @param {string} name
-   * @param {...array} eventArgs
-   */
-  dispatch(name, ...eventArgs) {
+  dispatch(name: string, ...eventArgs: Array<any>) {
     const event = this.getEvent(name)
 
     if (event) {
@@ -114,12 +89,8 @@ class EventAggregator {
 
   /**
    * Subscribe to Event and unsubscribe after call
-   *
-   * @param {string} eventName
-   * @param {function} handler
-   * @returns {{ event: *, handlerWrapper: (function(...[*])) }}
    */
-  once(eventName, handler) {
+  once(eventName: string, handler: Function): { event: Event, handlerWrapper: Function } {
     const event = this.getEvent(eventName)
 
     const handlerWrapper = (...args) => {

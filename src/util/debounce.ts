@@ -1,4 +1,4 @@
-const debounce = (func, wait, immediate) => {
+const debounce = (func: Function, wait: number, immediate?: boolean): Function => {
   let timeout
 
   return function () {
@@ -7,7 +7,7 @@ const debounce = (func, wait, immediate) => {
     const later = function () {
       timeout = null
       if (!immediate) {
-        func.apply(context, arguments)
+        func.apply(context, arguments) // eslint-disable-line
       }
     }
 
@@ -18,7 +18,7 @@ const debounce = (func, wait, immediate) => {
     timeout = setTimeout(later, wait)
 
     if (callNow) {
-      func.apply(context, arguments)
+      func.apply(context, arguments) // eslint-disable-line
     }
   }
 }

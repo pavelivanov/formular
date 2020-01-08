@@ -1,8 +1,8 @@
 {
   "name": "formular",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "author": "Pavel Ivanov",
-  "description": "Form worker",
+  "description": "Build forms in React. Easy-Peasy!",
   "homepage": "https://github.com/pavelivanov/formular#readme",
   "repository": {
     "type": "git",
@@ -14,32 +14,33 @@
   "keywords": [
     "form",
     "formjs",
-    "vanilla",
-    "reactive"
+    "react",
+    "hooks"
   ],
   "license": "ISC",
   "main": "lib/index.js",
   "scripts": {
     "test": "jest --bail --colors",
-    "dev": "babel ./src --out-dir ./lib --watch",
-    "build": "babel ./src --out-dir ./lib",
+    "dev": "babel ./src -d ./lib --extensions \".ts,.tsx\" --source-maps inline --watch",
+    "build": "babel ./src -d ./lib --extensions \".ts,.tsx\" --source-maps inline",
     "prepublish": "npm run build"
   },
-  "devDependencies": {
-    "@babel/cli": "~7.2.0",
-    "@babel/core": "7.2.0",
-    "@babel/plugin-proposal-class-properties": "~7.2.1",
-    "@babel/plugin-proposal-object-rest-spread": "~7.2.0",
-    "@babel/plugin-transform-classes": "~7.2.0",
-    "@babel/plugin-transform-destructuring": "~7.2.0",
-    "@babel/plugin-transform-runtime": "~7.2.0",
-    "@babel/preset-env": "~7.2.0",
-    "@babel/preset-react": "~7.0.0",
-    "@babel/register": "~7.0.0",
-    "babel-core": "^7.0.0-bridge.0",
-    "jest": "~23.6.0"
+  "peerDependencies": {
+    "react": "^16.8.0"
   },
-  "dependencies": {
-    "@babel/runtime": "~7.2.0"
+  "devDependencies": {
+    "@babel/cli": "^7.7.7",
+    "@babel/core": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.7.7",
+    "@babel/plugin-transform-classes": "^7.7.4",
+    "@babel/plugin-transform-destructuring": "^7.7.4",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-react": "^7.7.4",
+    "@babel/preset-typescript": "^7.7.7",
+    "@babel/register": "^7.7.7",
+    "babel-core": "^7.0.0-bridge.0",
+    "jest": "^24.9.0"
   }
 }
