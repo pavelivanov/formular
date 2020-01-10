@@ -11,6 +11,15 @@ export type FieldOpts = {
   validationDelay?: number
 }
 
+type State = {
+  value: any
+  error: any
+  isChanged: boolean
+  isValidating: boolean
+  isValidated: boolean
+  isValid: boolean
+}
+
 class Field {
 
   form: Form
@@ -20,15 +29,7 @@ class Field {
   validators?: Array<Function>
   readOnly: boolean
   debounceValidate: Function
-
-  state: {
-    value: any
-    error: string
-    isChanged: boolean
-    isValidating: boolean
-    isValidated: boolean
-    isValid: boolean
-  }
+  state: State
 
   private _events: Events
   private _initialValue: any
@@ -66,6 +67,11 @@ class Field {
     // ))
   }
 
+  setState(values: Partial<State>) {
+    this.state = { ...this.state, ...values }
+    this._events.dispatch('state change', this.state)
+  }
+
   setRef(node) {
     this.node = node
 
@@ -90,22 +96,25 @@ class Field {
     const modifiedValue = Field.modifyValue(value)
 
     if (modifiedValue !== this.state.value && !this.readOnly) {
-      this.state.value = modifiedValue
-      this.state.isChanged = true
+      this.setState({
+        value: modifiedValue,
+        isChanged: true,
+      })
 
-      this._events.dispatch('change', this.state.value)
+      this._events.dispatch('set', this.state.value)
+      this._events.dispatch('change', this.state.value) // @deprecated
     }
   }
 
   unset() {
-    this.state = {
+    this.setState({
       value: this._initialValue,
       error: null,
       isChanged: false,
       isValidating: false,
       isValidated: false,
       isValid: true,
-    }
+    })
 
     this._events.dispatch('unset')
   }
@@ -120,14 +129,19 @@ class Field {
     this._events.dispatch('start validate')
 
     const setError = (error: string) => {
-      this.state.error = error
-      this.state.isValidated = true
-      this.state.isValid = !error
+      this.setState({
+        error,
+        isValid: !error,
+        isValidating: false,
+        isValidated: true,
+      })
 
       this._events.dispatch('validate', this.state.error)
     }
 
-    this.state.isValidating = true
+    this.setState({
+      isValidating: true,
+    })
 
     if (this._cancelablePromise) {
       this._cancelablePromise.cancel()
