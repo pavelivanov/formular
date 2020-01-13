@@ -91,7 +91,7 @@ class Form {
     const values = {}
 
     Object.keys(this.fields).forEach((fieldName) => {
-      values[fieldName] = this.fields[fieldName].value
+      values[fieldName] = this.fields[fieldName].state.value
     })
 
     return values
@@ -112,7 +112,7 @@ class Form {
     const errors = {}
 
     Object.keys(this.fields).forEach((fieldName) => {
-      errors[fieldName] = this.fields[fieldName].error
+      errors[fieldName] = this.fields[fieldName].state.error
     })
 
     return errors
