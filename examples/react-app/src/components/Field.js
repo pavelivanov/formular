@@ -1,44 +1,30 @@
-import React, { useReducer } from 'react'
+import React, { useCallback } from 'react'
 import PropTypes from 'prop-types'
-import { Input } from 'formular/react/tags'
+import { useFieldState } from 'formular'
 
 
 const Field = ({ field, placeholder, readOnly }) => {
-  const [ state, setState ] = useReducer(
-    (state, newState) => ({ ...state, ...newState }),
-    { isValidationProcess: false, error: field.error || null }
-  )
+  const { value, error, isValidating } = useFieldState(field)
 
-  const { isValidationProcess, error } = state
-
-  const handleStartValidate = () => {
-    setState({
-      isValidationProcess: true,
-    })
-  }
-
-  const handleValidate = (error) => {
-    setState({
-      isValidationProcess: false,
-      error,
-    })
-  }
+  const handleChange = useCallback((event) => {
+    field.set(event.target.value)
+  }, [])
 
   return (
     <div className="field">
       <div className="inputRelativeWrapper">
         {
-          isValidationProcess && (
+          isValidating && (
             <div className="spinner" />
           )
         }
-        <Input
+        <input
           className={error ? 'withError' : ''}
-          field={field}
+          value={value}
+          type="text"
           placeholder={placeholder}
-          onStartValidate={handleStartValidate}
-          onValidate={handleValidate}
           readOnly={readOnly}
+          onChange={handleChange}
         />
       </div>
       {
