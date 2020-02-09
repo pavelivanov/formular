@@ -52,12 +52,13 @@ class Form {
       let fieldOpts       = this.opts.fields[fieldName]
 
       fieldOpts = Array.isArray(fieldOpts) ? { validate: fieldOpts } : fieldOpts
+      fieldOpts.name = fieldName
 
       if (typeof initialValue !== 'undefined') {
         fieldOpts.value = initialValue
       }
 
-      const field = new Field(fieldName, fieldOpts, this)
+      const field = new Field(fieldOpts, this)
 
       this.fields[fieldName] = field
 

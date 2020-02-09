@@ -4,6 +4,7 @@ import { asyncSome, debounce, CancelablePromise } from './util'
 
 
 export type FieldOpts = {
+  name?: string
   node?: HTMLElement
   value?: string
   validate?: Array<Function>
@@ -23,7 +24,7 @@ type State = {
 class Field {
 
   form: Form
-  name: string
+  name?: string
   opts: FieldOpts
   node: HTMLElement
   validators?: Array<Function>
@@ -39,10 +40,10 @@ class Field {
     return value === undefined || value === null ? '' : value
   }
 
-  constructor(name: string, opts: FieldOpts = {}, form?: Form) {
+  constructor(opts: FieldOpts = {}, form?: Form) {
     this.form                 = form
-    this.name                 = name
     this.opts                 = opts
+    this.name                 = opts.name
     this.node                 = opts.node
     this.readOnly             = opts.readOnly || false
     this.validators           = opts.validate || []
