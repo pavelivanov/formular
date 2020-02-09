@@ -73,6 +73,9 @@ type FormOpts = {
   }
   initialValues?: object
 }
+
+const opts: FormOpts = { ... }
+const form = new Form(opts)
 ```
 
 #### Field
@@ -85,6 +88,9 @@ type FieldOpts = {
   readOnly?: boolean
   validationDelay?: number      // adds debounce to validation
 }
+
+const opts: FieldOpts = { ... }
+const field = new Field(opts)
 ```
 ```ts
 const required = (value) => !value && value !== 0 ? 'Required' : undefined 
@@ -124,6 +130,8 @@ type FormEntity = {
   on(eventName: string, handler: Function): void
   off(eventName: string, handler: Function): void
 }
+
+const form: FormEntity = new Form(opts)
 ```
 
 #### Field
@@ -154,6 +162,8 @@ type FieldEntity = {
   on(eventName: string, handler: Function): void
   off(eventName: string, handler: Function): void
 }
+
+const field: FieldEntity = new Field(opts)
 ```
 
 
