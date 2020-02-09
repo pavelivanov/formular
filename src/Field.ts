@@ -23,11 +23,11 @@ type State = {
 
 class Field {
 
-  form: Form
+  form?: Form
   name?: string
   opts: FieldOpts
-  node: HTMLElement
-  validators?: Array<Function>
+  node?: HTMLElement
+  validators: Array<Function>
   readOnly: boolean
   debounceValidate: Function
   state: State
@@ -68,12 +68,12 @@ class Field {
     // ))
   }
 
-  setState(values: Partial<State>) {
+  setState(values: Partial<State>): void {
     this.state = { ...this.state, ...values }
     this._events.dispatch('state change', this.state)
   }
 
-  setRef(node) {
+  setRef(node: HTMLElement): void {
     this.node = node
 
     if (this.node) {
@@ -81,7 +81,7 @@ class Field {
     }
   }
 
-  unsetRef() {
+  unsetRef(): void {
     if (this.node) {
       this.node.removeEventListener('blur', this.handleBlur)
     }
@@ -89,11 +89,11 @@ class Field {
     this.node = null
   }
 
-  handleBlur = () => {
+  private handleBlur = () => {
     this._events.dispatch('blur')
   }
 
-  set(value: any) {
+  set(value: any): void {
     const modifiedValue = Field.modifyValue(value)
 
     if (modifiedValue !== this.state.value && !this.readOnly) {
@@ -107,7 +107,7 @@ class Field {
     }
   }
 
-  unset() {
+  unset(): void {
     this.setState({
       value: this._initialValue,
       error: null,
@@ -163,11 +163,11 @@ class Field {
     })
   }
 
-  on(eventName: string, handler: Function) {
+  on(eventName: string, handler: Function): void {
     this._events.subscribe(eventName, handler)
   }
 
-  off(eventName: string, handler: Function) {
+  off(eventName: string, handler: Function): void {
     this._events.unsubscribe(eventName, handler)
   }
 }

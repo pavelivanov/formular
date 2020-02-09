@@ -1,10 +1,12 @@
 import Events from './Events'
-import Field from './Field'
+import Field, { FieldOpts } from './Field'
 
 
 export type FormOpts = {
   name?: string
-  fields: object
+  fields: {
+    [key: string]: FieldOpts
+  }
   initialValues?: object
 }
 
@@ -25,7 +27,9 @@ class Form {
   private _events: Events
   name: string
   opts: FormOpts
-  fields: object
+  fields: {
+    [key: string]: Field
+  }
   state: State
 
   constructor(opts: FormOpts) {
@@ -72,12 +76,12 @@ class Form {
     })
   }
 
-  setState(values: Partial<State>) {
+  setState(values: Partial<State>): void {
     this.state = { ...this.state, ...values }
     this._events.dispatch('state change', this.state)
   }
 
-  setValues(values: object) {
+  setValues(values: object): void {
     // TODO should we mark form as changed and validate it?
     Object.keys(values).forEach((fieldName) => {
       const field: Field = this.fields[fieldName]
@@ -98,7 +102,7 @@ class Form {
     return values
   }
 
-  unsetValues() {
+  unsetValues(): void {
     this.setState({
       isChanged: false,
       isValid: true,
@@ -146,11 +150,11 @@ class Form {
     return values
   }
 
-  on(eventName: string, handler: Function) {
+  on(eventName: string, handler: Function): void {
     this._events.subscribe(eventName, handler)
   }
 
-  off(eventName: string, handler: Function) {
+  off(eventName: string, handler: Function): void {
     this._events.unsubscribe(eventName, handler)
   }
 }
