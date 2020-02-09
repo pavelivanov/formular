@@ -49,3 +49,4 @@ const App = () => {
 ## Examples
 
 - [Basics](https://codesandbox.io/s/formular-basics-cke7r)
+- [Building own Input](https://codesandbox.io/s/formular-building-own-input-4qsxd)
