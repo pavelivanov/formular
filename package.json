@@ -17,6 +17,9 @@
     "react",
     "hooks"
   ],
+  "files": [
+    "lib"
+  ],
   "license": "ISC",
   "main": "lib/index.js",
   "scripts": {
