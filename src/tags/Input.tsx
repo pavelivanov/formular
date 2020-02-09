@@ -12,14 +12,18 @@ const Input: React.FunctionComponent<InputProps> = ({ field, onChange, ...rest }
 
   const handleChange = useCallback((event) => {
     field.set(event.target.value)
-  }, [])
+
+    if (typeof onChange === 'function') {
+      onChange(event)
+    }
+  }, [ field ])
 
   return (
     <input
       type="text"
       {...rest}
       value={value}
-      onchange={handleChange}
+      onChange={handleChange}
     />
   )
 }
