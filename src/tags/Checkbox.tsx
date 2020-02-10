@@ -3,30 +3,30 @@ import Field from '../Field'
 import useFieldState from '../useFieldState'
 
 
-type InputProps = HTMLInputElement & {
+type CheckboxProps = HTMLInputElement & {
   field: Field
 }
 
-const Input: React.FunctionComponent<InputProps> = ({ field, onChange, ...rest }) => {
+const Checkbox: React.FunctionComponent<CheckboxProps> = ({ field, onChange, ...rest }) => {
   const { value } = useFieldState(field)
 
   const handleChange = useCallback((event) => {
-    field.set(event.target.value)
+    field.set(event.target.checked)
 
     if (typeof onChange === 'function') {
       onChange(event)
     }
-  }, [ field ])
+  }, [])
 
   return (
     <input
-      type="text"
+      type="checkbox"
       {...rest}
-      value={value}
-      onChange={handleChange}
+      checked={value}
+      onchange={handleChange}
     />
   )
 }
 
 
-export default Input
+export default Checkbox
