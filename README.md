@@ -56,6 +56,14 @@ const App = () => {
 }
 ```
 
+##### Field validation
+
+```ts
+// validator should return "undefined" if value is valid
+
+const required = (value) => !value && value !== 0 ? 'Required' : undefined 
+```
+
 
 ## Examples
 
@@ -88,18 +96,6 @@ type FieldOpts = {
   readOnly?: boolean
   validationDelay?: number      // adds debounce to validation
 }
-```
-
-##### Field validation
-
-```ts
-// validator should return "undefined" if value is valid
-const required = (value) => !value && value !== 0 ? 'Required' : undefined 
-
-useField({
-  name: 'email',
-  validate: [ required ],
-})
 ```
 
 
