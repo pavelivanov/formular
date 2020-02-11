@@ -22,15 +22,16 @@ npm install formular
 #### Usage
 
 ```jsx harmony
+import { useForm } from 'formular'
+import { Input } from 'formular/lib/tags'
+
 const App = () => {
-  const form = useMemo(() => (
-    new Form({
-      fields: {
-        email: [ required ],
-        password: [ required ],
-      },
-    })
-  ), [])
+  const form = useForm({
+    fields: {
+      email: [ required ],
+      password: [ required ],
+    },
+  })
 
   return (
     <Input field={form.fields.email} />
@@ -41,12 +42,13 @@ const App = () => {
 Or if you need only one field you can just do
 
 ```jsx harmony
+import { useField } from 'formular'
+import { Input } from 'formular/lib/tags'
+
 const App = () => {
-  const field = useMemo(() => (
-    new Field({
-      validate: [ required ],
-    })
-  ), [])
+  const field = useField({
+    validate: [ required ],
+  })
 
   return (
     <Input field={field} />
@@ -74,9 +76,6 @@ type FormOpts = {
   }
   initialValues?: object
 }
-
-const opts: FormOpts = { ... }
-const form = new Form(opts)
 ```
 
 #### Field
@@ -89,21 +88,22 @@ type FieldOpts = {
   readOnly?: boolean
   validationDelay?: number      // adds debounce to validation
 }
-
-const opts: FieldOpts = { ... }
-const field = new Field(opts)
 ```
+
+##### Field validation
+
 ```ts
+// validator should return "undefined" if value is valid
 const required = (value) => !value && value !== 0 ? 'Required' : undefined 
 
-new Field({
+useField({
   name: 'email',
   validate: [ required ],
 })
 ```
 
 
-## Exemplars
+## Interfaces
 
 #### Form
 
@@ -132,7 +132,7 @@ type FormEntity = {
   off(eventName: string, handler: Function): void
 }
 
-const form: FormEntity = new Form(opts)
+const form: FormEntity = useForm(opts)
 ```
 
 #### Field
@@ -164,7 +164,7 @@ type FieldEntity = {
   off(eventName: string, handler: Function): void
 }
 
-const field: FieldEntity = new Field(opts)
+const field: FieldEntity = useField(opts)
 ```
 
 
