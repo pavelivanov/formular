@@ -4,7 +4,7 @@ import Form from './Form'
 import useForceUpdate from './useForceUpdate'
 
 
-const useFormState = (form: Form) => {
+const useFormState = <T extends {}>(form: Form<T>) => {
   const forceUpdate   = useForceUpdate()
 
   useEffect(() => {

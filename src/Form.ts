@@ -1,13 +1,23 @@
 import Events from './Events'
-import Field, { FieldOpts } from './Field'
+import Field, { FieldOpts, Validator } from './Field'
 
 
-export type FormOpts = {
+type Obj = {
+  [key: string]: any
+}
+
+export type FormOpts<T extends Object> = {
   name?: string
   fields: {
-    [key: string]: FieldOpts
+    [K in keyof T]: FieldOpts<T[K]> | Validator[]
   }
-  initialValues?: object
+  initialValues?: {
+    [K in keyof T]: T[K]
+  }
+}
+
+type FormFields<T extends {}> = {
+  [K in keyof T]: Field<T[K]>
 }
 
 type State = {
@@ -18,23 +28,22 @@ type State = {
   isSubmitted: boolean
 }
 
-const defaultOptions = {
+const defaultOptions: any = {
   initialValues: {},
 }
 
-class Form {
+class Form<FieldValues extends Object> {
 
   private _events: Events
-  name: string
-  opts: FormOpts
-  fields: {
-    [key: string]: Field
-  }
+  name?: string
+  opts: FormOpts<FieldValues>
+  fields: FormFields<FieldValues>
   state: State
 
-  constructor(opts: FormOpts) {
+  constructor(opts: FormOpts<FieldValues>) {
     this.name   = opts.name
     this.opts   = { ...defaultOptions, ...opts }
+    // @ts-ignore
     this.fields = {}
 
     this.state = {
@@ -51,18 +60,20 @@ class Form {
   }
 
   private _setupFields() {
-    Object.keys(this.opts.fields).forEach((fieldName) => {
-      const initialValue  = this.opts.initialValues && this.opts.initialValues[fieldName]
-      let fieldOpts       = this.opts.fields[fieldName]
+    const fieldNames = Object.keys(this.opts.fields) as Array<keyof FieldValues>
+
+    fieldNames.forEach((fieldName) => {
+      const initialValue = this.opts.initialValues && this.opts.initialValues[fieldName]
+      let fieldOpts: FieldOpts<FieldValues[typeof fieldName]> | Validator[] = this.opts.fields[fieldName]
 
       fieldOpts = Array.isArray(fieldOpts) ? { validate: fieldOpts } : fieldOpts
-      fieldOpts.name = fieldName
+      fieldOpts.name = fieldName as string
 
       if (typeof initialValue !== 'undefined') {
         fieldOpts.value = initialValue
       }
 
-      const field = new Field(fieldOpts, this)
+      const field = new Field<FieldValues[typeof fieldName]>(fieldOpts, this)
 
       this.fields[fieldName] = field
 
@@ -81,10 +92,10 @@ class Form {
     this._events.dispatch('state change', this.state)
   }
 
-  setValues(values: object): void {
+  setValues(values: Obj): void {
     // TODO should we mark form as changed and validate it?
     Object.keys(values).forEach((fieldName) => {
-      const field: Field = this.fields[fieldName]
+      const field = (this.fields as any)[fieldName]
 
       if (field) {
         field.set(values[fieldName])
@@ -92,11 +103,11 @@ class Form {
     })
   }
 
-  getValues(): object {
-    const values = {}
+  getValues(): Obj {
+    const values: Obj = {}
 
     Object.keys(this.fields).forEach((fieldName) => {
-      values[fieldName] = this.fields[fieldName].state.value
+      values[fieldName] = (this.fields as any)[fieldName].state.value
     })
 
     return values
@@ -109,22 +120,22 @@ class Form {
     })
 
     Object.keys(this.fields).forEach((fieldName) => {
-      this.fields[fieldName].unset()
+      (this.fields as any)[fieldName].unset()
     })
   }
 
-  getErrors(): object {
-    const errors = {}
+  getErrors(): Obj {
+    const errors: Obj = {}
 
     Object.keys(this.fields).forEach((fieldName) => {
-      errors[fieldName] = this.fields[fieldName].state.error
+      errors[fieldName] = (this.fields as any)[fieldName].state.error
     })
 
     return errors
   }
 
   async validate(): Promise<boolean> {
-    const promises  = Object.keys(this.fields).map((fieldName) => this.fields[fieldName].validate())
+    const promises  = Object.keys(this.fields).map((fieldName) => (this.fields as any)[fieldName].validate())
     const errors    = await Promise.all(promises)
     const isValid   = errors.every((error) => !error)
 

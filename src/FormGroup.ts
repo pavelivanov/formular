@@ -1,22 +1,31 @@
+import { debounce } from './util/index'
 import Events from './Events'
-import { debounce } from './util'
+import Form from './Form'
 
 
 const formEvents = [ 'change', 'set values', 'unset values' ]
 
+type Obj = {
+  [key: string]: any
+}
+
+type Forms = {
+  [key: string]: Form<{}>
+}
+
 class FormGroup {
 
   private _events: Events
-  forms: object
+  forms: Forms
 
-  constructor(forms: object) {
+  constructor(forms: Forms) {
     this._events = new Events()
     this.forms = forms
 
     this._subscribe()
   }
 
-  replace(newForms: object) {
+  replace(newForms: Forms) {
     this._unsubscribe()
 
     this.forms = newForms
@@ -62,7 +71,7 @@ class FormGroup {
     return isValid
   }
 
-  setValues(values: object) {
+  setValues(values: Obj): void {
     const formNames = Object.keys(this.forms)
 
     formNames.forEach((formName) => {
@@ -77,9 +86,9 @@ class FormGroup {
     this._events.dispatch('set values')
   }
 
-  getValues(): object {
+  getValues(): Obj {
     const formNames = Object.keys(this.forms)
-    const values = {}
+    const values: Obj = {}
 
     formNames.forEach((formName) => {
       const form = this.forms[formName]
@@ -90,7 +99,7 @@ class FormGroup {
     return values
   }
 
-  unsetValues() {
+  unsetValues(): void {
     const formNames = Object.keys(this.forms)
 
     formNames.forEach((formName) => {
@@ -103,9 +112,9 @@ class FormGroup {
   }
 
   // TODO looks like getValues() if we need rewrite it? Write getKeyValues(key)
-  getErrors(): object {
+  getErrors(): Obj {
     const formNames = Object.keys(this.forms)
-    const errors = {}
+    const errors: Obj = {}
 
     formNames.forEach((formName) => {
       const form = this.forms[formName]
@@ -125,26 +134,14 @@ class FormGroup {
       return Promise.reject(errors)
     }
 
-    const values = this.getValues()
-
-    return values
+    return this.getValues()
   }
 
-  /**
-   *
-   * @param {string} eventName
-   * @param {function} handler
-   */
-  on(eventName, handler) {
+  on(eventName: string, handler: Function): void {
     this._events.subscribe(eventName, handler)
   }
 
-  /**
-   *
-   * @param {string} eventName
-   * @param {function} handler
-   */
-  off(eventName, handler) {
+  off(eventName: string, handler: Function): void {
     this._events.unsubscribe(eventName, handler)
   }
 }

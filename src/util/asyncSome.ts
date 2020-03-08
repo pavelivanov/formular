@@ -1,4 +1,4 @@
-const asyncSome = async (arr: Array<any>, calle: Function) => {
+const asyncSome = async (arr: Array<any>, calle: Function): Promise<boolean> => {
   if (arr.length) {
     const [ item, ...restItems ] = arr
     const isMatch = await calle(item)

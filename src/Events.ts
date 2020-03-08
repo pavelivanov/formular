@@ -45,7 +45,9 @@ class Event {
 
 class EventAggregator {
 
-  events: object
+  events: {
+    [key: string]: Event
+  }
 
   constructor() {
     this.events = {}
@@ -93,7 +95,7 @@ class EventAggregator {
   once(eventName: string, handler: Function): { event: Event, handlerWrapper: Function } {
     const event = this.getEvent(eventName)
 
-    const handlerWrapper = (...args) => {
+    const handlerWrapper = (...args: any[]) => {
       const result = handler(...args)
       if (result) {
         event.removeHandler(handlerWrapper)

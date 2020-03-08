@@ -33,8 +33,20 @@ const App = () => {
     },
   })
 
+  const handleSubmit = useCallback(() => {
+    form.submit()
+      .then((values) => {
+        // { email: "noreply@gmail.com", password: "strongpass" }
+      }, (errors) => {
+        // { email: "Required", password: "Required" }
+      })
+  }, [])  
+
   return (
-    <Input field={form.fields.email} />
+    <Fragment>
+      <Input field={form.fields.email} />
+      <button onClick={handleSubmit}>Submit</button>
+    </Fragment>
   )  
 }
 ```
@@ -49,9 +61,20 @@ const App = () => {
   const field = useField({
     validate: [ required ],
   })
+  
+  const handleSubmit = useCallback(() => {
+    form.validate()
+      .then((error) => {
+        // { email: "noreply@gmail.com", password: "strongpass" }
+      })
+  }, [])  
+
 
   return (
-    <Input field={field} />
+    <Fragment>
+      <Input field={field} />
+      <button onClick={handleSubmit}>Submit</button>
+    </Fragment>
   ) 
 }
 ```

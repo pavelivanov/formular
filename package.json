@@ -22,11 +22,11 @@
   ],
   "license": "ISC",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "jest --bail --colors",
-    "dev": "babel ./src -d ./lib --extensions \".ts,.tsx\" --source-maps inline --watch",
-    "build": "babel ./src -d ./lib --extensions \".ts,.tsx\" --source-maps inline",
-    "prepublish": "npm run build"
+    "build": "rm -rf ./lib && babel ./src -d ./lib --extensions \".ts,.tsx\" --source-maps inline",
+    "prepublish": "npm run test && npm run build"
   },
   "peerDependencies": {
     "react": "^16.8.0"
@@ -43,7 +43,13 @@
     "@babel/preset-react": "^7.7.4",
     "@babel/preset-typescript": "^7.7.7",
     "@babel/register": "^7.7.7",
+    "@testing-library/react-hooks": "^3.2.1",
+    "@types/react": "^16.9.22",
     "babel-core": "^7.0.0-bridge.0",
-    "jest": "^24.9.0"
+    "jest": "^24.9.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "react": "^16.12.0"
   }
 }

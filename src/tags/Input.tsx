@@ -3,8 +3,8 @@ import Field from '../Field'
 import useFieldState from '../useFieldState'
 
 
-type InputProps = HTMLInputElement & {
-  field: Field
+type InputProps = React.InputHTMLAttributes<any> & {
+  field: Field<string>
 }
 
 const Input: React.FunctionComponent<InputProps> = ({ field, onChange, ...rest }) => {

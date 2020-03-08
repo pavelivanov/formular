@@ -3,7 +3,7 @@ import Field, { FieldOpts } from './Field'
 
 
 
-const useField = (opts: FieldOpts, deps?: any[]) =>
+const useField = <T extends {}>(opts: FieldOpts<T>, deps?: any[]) =>
   useMemo(() => new Field(opts), deps || [])
 
 

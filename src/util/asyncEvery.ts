@@ -1,4 +1,4 @@
-const asyncEvery = async (arr: Array<any>, calle: Function) => {
+const asyncEvery = async (arr: Array<any>, calle: Function): Promise<boolean> => {
   if (arr.length) {
     const [ item, ...restItems ] = arr
     const isOk = await calle(item)

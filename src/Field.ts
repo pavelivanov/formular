@@ -1,19 +1,21 @@
+import { asyncSome, debounce, CancelablePromise } from './util/index'
 import Events from './Events'
 import Form from './Form'
-import { asyncSome, debounce, CancelablePromise } from './util'
 
 
-export type FieldOpts = {
+export type Validator = (value: any, fields: { [key: string]: Field<any> }) => void
+
+export type FieldOpts<Value> = {
   name?: string
   node?: HTMLElement
-  value?: string
-  validate?: Array<Function>
+  value?: Value
+  validate?: Validator[]
   readOnly?: boolean
   validationDelay?: number
 }
 
-type State = {
-  value: any
+type State<ValueType> = {
+  value: ValueType
   error: any
   isChanged: boolean
   isValidating: boolean
@@ -21,26 +23,26 @@ type State = {
   isValid: boolean
 }
 
-class Field {
+class Field<Value> {
 
-  form?: Form
+  form?: Form<any>
   name?: string
-  opts: FieldOpts
+  opts: FieldOpts<Value>
   node?: HTMLElement
-  validators: Array<Function>
+  validators: Validator[]
   readOnly: boolean
   debounceValidate: Function
-  state: State
+  state: State<Value>
 
   private _events: Events
   private _initialValue: any
-  private _cancelablePromise: CancelablePromise
+  private _cancelablePromise: CancelablePromise | null
 
-  static modifyValue(value) {
+  static modifyValue(value: any): any {
     return value === undefined || value === null ? '' : value
   }
 
-  constructor(opts: FieldOpts = {}, form?: Form) {
+  constructor(opts: FieldOpts<Value> = {}, form?: Form<any>) {
     this.form                 = form
     this.opts                 = opts
     this.name                 = opts.name
@@ -68,7 +70,7 @@ class Field {
     // ))
   }
 
-  setState(values: Partial<State>): void {
+  setState(values: Partial<State<Value>>): void {
     this.state = { ...this.state, ...values }
     this._events.dispatch('state change', this.state)
   }
@@ -86,7 +88,7 @@ class Field {
       this.node.removeEventListener('blur', this.handleBlur)
     }
 
-    this.node = null
+    this.node = undefined
   }
 
   private handleBlur = () => {
@@ -122,10 +124,10 @@ class Field {
 
   validate = (): CancelablePromise => {
     if (!this.validators || !this.validators.length) {
-      return
+      return CancelablePromise.resolve()
     }
 
-    let error
+    let error: any
 
     this._events.dispatch('start validate')
 
@@ -148,8 +150,8 @@ class Field {
       this._cancelablePromise.cancel()
     }
 
-    this._cancelablePromise = new CancelablePromise(async (resolve) => {
-      await asyncSome(this.validators, async (validator) => {
+    this._cancelablePromise = new CancelablePromise(async (resolve: Function) => {
+      await asyncSome(this.validators, async (validator: Function) => {
         error = await validator(this.state.value, this.form && this.form.fields) // error here is String error message
         return Boolean(error)
       })

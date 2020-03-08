@@ -4,9 +4,9 @@
 
  */
 
-const handleCallback = (resolve, reject, callback, r) => {
+const handleCallback = (resolve: Function, reject: Function, callback: Function, result: any) => {
   try {
-    resolve(callback(r))
+    resolve(callback(result))
   }
   catch (e) {
     reject(e)
@@ -31,13 +31,13 @@ class CancelablePromise {
     })
   }
 
-  static reject(value: any) {
+  static reject(value?: any) {
     return new CancelablePromise((y, n) => {
       Promise.reject(value).then(y, n)
     })
   }
 
-  static resolve(value: any) {
+  static resolve(value?: any) {
     return new CancelablePromise((y, n) => {
       Promise.resolve(value).then(y, n)
     })
@@ -49,29 +49,29 @@ class CancelablePromise {
     this._canceled = false
   }
 
-  then(success?, error?): CancelablePromise {
+  then(success?: Function, error?: Function): CancelablePromise {
     const promise = new CancelablePromise((resolve, reject) => {
-      this._promise.then((r) => {
+      this._promise.then((result) => {
         if (this._canceled) {
           promise.cancel()
         }
 
         if (success && !this._canceled) {
-          handleCallback(resolve, reject, success, r)
+          handleCallback(resolve, reject, success, result)
         }
         else {
-          resolve(r)
+          resolve(result)
         }
-      }, (r) => {
+      }, (result) => {
         if (this._canceled) {
           promise.cancel()
         }
 
         if (error && !this._canceled) {
-          handleCallback(resolve, reject, error, r)
+          handleCallback(resolve, reject, error, result)
         }
         else {
-          reject(r)
+          reject(result)
         }
       })
     })
@@ -79,7 +79,7 @@ class CancelablePromise {
     return promise
   }
 
-  catch(error: Error): object {
+  catch(error: Function): object {
     return this.then(undefined, error)
   }
 

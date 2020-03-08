@@ -1,4 +1,6 @@
-import Form, { FormGroup } from '../src'
+// import { act, renderHook } from '@testing-library/react-hooks'
+
+import { Form, FormGroup } from '../lib'
 import { required, streetAddress, telephone } from './util/validation'
 
 
@@ -45,9 +47,8 @@ describe('form', () => {
           address: [],
           telephone: [],
         },
+        initialValues,
       })
-
-      form.setInitialValues(initialValues)
 
       expect(form.getValues()).toEqual(initialValues)
     })
@@ -96,9 +97,9 @@ describe('form', () => {
           address: [],
           telephone: [],
         },
+        initialValues,
       })
 
-      form.setInitialValues(initialValues)
       form.setValues(newValues)
 
       expect(form.getValues()).toEqual(newValues)
