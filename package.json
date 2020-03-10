@@ -25,7 +25,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "jest --bail --colors",
-    "build": "rm -rf ./lib && babel ./src -d ./lib --extensions \".ts,.tsx\" --source-maps inline",
+    "tsc": "tsc --declaration --outDir lib",
+    "build": "rm -rf ./lib && babel ./src -d ./lib --extensions \".ts,.tsx\" --source-maps inline && npm run tsc",
     "prepublish": "npm run test && npm run build"
   },
   "peerDependencies": {
