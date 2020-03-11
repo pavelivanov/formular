@@ -122,6 +122,19 @@ class Field<Value> {
     this._events.dispatch('unset')
   }
 
+  setError(error: any): void {
+    this.setState({
+      error,
+      isChanged: true,
+      isValid: false,
+      isValidating: false,
+      isValidated: true,
+    })
+
+    this._events.dispatch('set', this.state.value)
+    this._events.dispatch('change', this.state.value) // @deprecated
+  }
+
   validate = (): CancelablePromise => {
     if (!this.validators || !this.validators.length) {
       return CancelablePromise.resolve()
