@@ -11,9 +11,9 @@ export type FormOpts<T extends Object> = {
   fields: {
     [K in keyof T]: FieldOpts<T[K]> | Validator[]
   }
-  initialValues?: {
+  initialValues?: Partial<{
     [K in keyof T]: T[K]
-  }
+  }>
 }
 
 type FormFields<T extends {}> = {

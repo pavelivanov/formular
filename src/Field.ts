@@ -14,8 +14,8 @@ export type FieldOpts<Value> = {
   validationDelay?: number
 }
 
-type State<ValueType> = {
-  value: ValueType
+export type State<Value> = {
+  value: Value
   error: any
   isChanged: boolean
   isValidating: boolean
