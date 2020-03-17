@@ -58,10 +58,10 @@ class Form<FieldValues extends Object> {
 
     this._events = new Events()
 
-    this.attachFields(this.opts.fields)
+    this._attachFields(this.opts.fields)
   }
 
-  attachFields(fieldOpts: FormFieldOpts<FieldValues> | Partial<FormFieldOpts<FieldValues>>) {
+  private _attachFields(fieldOpts: FormFieldOpts<FieldValues> | Partial<FormFieldOpts<FieldValues>>) {
     const fieldNames = Object.keys(fieldOpts) as Array<keyof FieldValues>
 
     fieldNames.forEach((fieldName) => {
@@ -89,10 +89,16 @@ class Form<FieldValues extends Object> {
     })
   }
 
+  attachFields(fieldOpts: FormFieldOpts<FieldValues> | Partial<FormFieldOpts<FieldValues>>) {
+    this._attachFields(fieldOpts)
+    this._events.dispatch('attach fields')
+  }
+
   detachFields(fieldNames: Array<keyof FieldValues>) {
     fieldNames.forEach((fieldName) => {
       delete this.fields[fieldName]
     })
+    this._events.dispatch('detach fields')
   }
 
   setState(values: Partial<State>): void {
