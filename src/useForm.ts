@@ -7,16 +7,14 @@ const useForm = <T extends any>(opts: FormOpts<T>, deps?: any[]) => {
   const form = useMemo(() => new Form(opts), deps || [ v ])
 
   useEffect(() => {
-    const handleFormUpdates = () => {
+    const handleUpdate = () => {
       update((v) => ++v)
     }
 
-    form.on('attach fields', handleFormUpdates)
-    form.on('detach fields', handleFormUpdates)
+    form.on('update', handleUpdate)
 
     return () => {
-      form.off('attach fields', handleFormUpdates)
-      form.off('detach fields', handleFormUpdates)
+      form.off('update', handleUpdate)
     }
   }, [])
 
