@@ -5,7 +5,7 @@ import useForceUpdate from './useForceUpdate'
 
 
 const useFormState = <T extends {}>(form: Form<T>) => {
-  const forceUpdate   = useForceUpdate()
+  const forceUpdate = useForceUpdate()
 
   useEffect(() => {
     form.on('change', forceUpdate)

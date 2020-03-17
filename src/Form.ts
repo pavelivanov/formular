@@ -6,11 +6,13 @@ type Obj = {
   [key: string]: any
 }
 
+type FormFieldOpts<T> = {
+  [K in keyof T]: FieldOpts<T[K]> | Validator[]
+}
+
 export type FormOpts<T extends Object> = {
   name?: string
-  fields: {
-    [K in keyof T]: FieldOpts<T[K]> | Validator[]
-  }
+  fields: FormFieldOpts<T>
   initialValues?: Partial<{
     [K in keyof T]: T[K]
   }>
@@ -56,11 +58,11 @@ class Form<FieldValues extends Object> {
 
     this._events = new Events()
 
-    this._setupFields()
+    this.attachFields(this.opts.fields)
   }
 
-  private _setupFields() {
-    const fieldNames = Object.keys(this.opts.fields) as Array<keyof FieldValues>
+  attachFields(fieldOpts: FormFieldOpts<FieldValues> | Partial<FormFieldOpts<FieldValues>>) {
+    const fieldNames = Object.keys(fieldOpts) as Array<keyof FieldValues>
 
     fieldNames.forEach((fieldName) => {
       const initialValue = this.opts.initialValues && this.opts.initialValues[fieldName]
@@ -84,6 +86,12 @@ class Form<FieldValues extends Object> {
       field.on('blur', () => {
         this._events.dispatch('blur', field)
       })
+    })
+  }
+
+  detachFields(fieldNames: Array<keyof FieldValues>) {
+    fieldNames.forEach((fieldName) => {
+      delete this.fields[fieldName]
     })
   }
 
