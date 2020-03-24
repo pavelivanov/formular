@@ -9,13 +9,15 @@
     "strict": true,
     "sourceMap": true,
     "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true
   },
   "include": [
-    "src"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "lib"
   ]
 }

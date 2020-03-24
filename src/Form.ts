@@ -10,7 +10,7 @@ type FormFieldOpts<T> = {
   [K in keyof T]: FieldOpts<T[K]> | Validator[]
 }
 
-export type FormOpts<T extends Object> = {
+export type FormOpts<T extends object> = {
   name?: string
   fields: FormFieldOpts<T>
   initialValues?: Partial<{
@@ -34,7 +34,7 @@ const defaultOptions: any = {
   initialValues: {},
 }
 
-class Form<FieldValues extends Object> {
+class Form<FieldValues extends object> {
 
   private _events: Events
   name?: string
