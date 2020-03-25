@@ -91,7 +91,7 @@ const required = (value) => !value && value !== 0 ? 'Required' : undefined
 ## Examples
 
 - [Basics](https://codesandbox.io/s/formular-basics-cke7r)
-- [Basics](https://codesandbox.io/s/formular-basics-cke7r)
+- [Building own Input](https://codesandbox.io/s/formular-building-own-input-4qsxd)
 - [Async validation](https://codesandbox.io/s/formular-async-validation-i6l4c)
 
 
