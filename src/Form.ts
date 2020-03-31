@@ -142,6 +142,16 @@ class Form<FieldValues extends object> {
     })
   }
 
+  setErrors(errors: Obj): void {
+    Object.keys(errors).forEach((fieldName) => {
+      const field = (this.fields as any)[fieldName]
+
+      if (field) {
+        field.setError(errors[fieldName])
+      }
+    })
+  }
+
   getErrors(): Obj {
     const errors: Obj = {}
 
