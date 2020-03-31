@@ -137,6 +137,14 @@ class Field<Value> {
 
   validate = (): CancelablePromise => {
     if (!this.validators || !this.validators.length) {
+      // existing error state should be cleared bcs it could be set from server validation via field.setError(err)
+      this.setState({
+        error: null,
+        isValid: true,
+        isValidating: false,
+        isValidated: true,
+      })
+
       return CancelablePromise.resolve()
     }
 
