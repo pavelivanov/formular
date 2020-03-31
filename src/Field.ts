@@ -1,4 +1,5 @@
-import { asyncSome, debounce, CancelablePromise } from './util/index'
+import equal from 'fast-deep-equal'
+import { asyncSome, debounce, CancelablePromise } from './util'
 import Events from './Events'
 import Form from './Form'
 
@@ -71,8 +72,13 @@ class Field<Value> {
   }
 
   setState(values: Partial<State<Value>>): void {
-    this.state = { ...this.state, ...values }
-    this._events.dispatch('state change', this.state)
+    const newState = { ...this.state, ...values }
+    const isEqual = equal(this.state, newState)
+
+    if (!isEqual) {
+      this.state = newState
+      this._events.dispatch('state change', this.state)
+    }
   }
 
   setRef(node: HTMLElement): void {
