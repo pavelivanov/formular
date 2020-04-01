@@ -11,6 +11,7 @@ export const eventNames = {
   change: 'change',
   focus: 'focus',
   blur: 'blur',
+  startValidate: 'start validate',
   validate: 'validate',
 } as const
 
@@ -47,7 +48,7 @@ class Field<Value> {
   debounceValidate: Function
   state: State<Value>
 
-  private _events: Events
+  private _events: Events<FieldEventName>
   private _initialValue: any
   private _cancelablePromise: CancelablePromise | null
 
@@ -73,7 +74,7 @@ class Field<Value> {
       isValid: true,
     }
 
-    this._events              = new Events()
+    this._events              = new Events<FieldEventName>()
     this._initialValue        = this.state.value
     this._cancelablePromise   = null
 
@@ -174,7 +175,7 @@ class Field<Value> {
 
     let error: any
 
-    this._events.dispatch('start validate')
+    this._events.dispatch(eventNames.startValidate)
 
     const setError = (error: string) => {
       this.setState({
@@ -210,11 +211,11 @@ class Field<Value> {
     })
   }
 
-  on(eventName: string, handler: Function): void {
+  on(eventName: FieldEventName, handler: Function): void {
     this._events.subscribe(eventName, handler)
   }
 
-  off(eventName: string, handler: Function): void {
+  off(eventName: FieldEventName, handler: Function): void {
     this._events.unsubscribe(eventName, handler)
   }
 }

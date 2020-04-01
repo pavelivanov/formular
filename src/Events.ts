@@ -43,20 +43,21 @@ class Event {
   }
 }
 
-class EventAggregator {
+class EventAggregator<EventName extends string> {
 
   events: {
-    [key: string]: Event
+    [key in EventName]: Event
   }
 
   constructor() {
+    // @ts-ignore
     this.events = {}
   }
 
   /**
    * Get Event by name
    */
-  getEvent(name: string): Event {
+  getEvent(name: EventName): Event {
     let event = this.events[name]
 
     if (!event) {
@@ -67,7 +68,7 @@ class EventAggregator {
     return event
   }
 
-  subscribe(name: string, handler: Function): { event: Event, handler: Function } {
+  subscribe(name: EventName, handler: Function): { event: Event, handler: Function } {
     const event = this.getEvent(name)
 
     event.addHandler(handler)
@@ -75,13 +76,13 @@ class EventAggregator {
     return { event, handler }
   }
 
-  unsubscribe(eventName: string, handler: Function) {
+  unsubscribe(eventName: EventName, handler: Function) {
     const event = this.getEvent(eventName)
 
     event.removeHandler(handler)
   }
 
-  dispatch(name: string, ...eventArgs: Array<any>) {
+  dispatch(name: EventName, ...eventArgs: Array<any>) {
     const event = this.getEvent(name)
 
     if (event) {
@@ -92,8 +93,8 @@ class EventAggregator {
   /**
    * Subscribe to Event and unsubscribe after call
    */
-  once(eventName: string, handler: Function): { event: Event, handlerWrapper: Function } {
-    const event = this.getEvent(eventName)
+  once(name: EventName, handler: Function): { event: Event, handlerWrapper: Function } {
+    const event = this.getEvent(name)
 
     const handlerWrapper = (...args: any[]) => {
       const result = handler(...args)

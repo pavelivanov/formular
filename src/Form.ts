@@ -2,11 +2,16 @@ import Events from './Events'
 import Field, { eventNames as fieldEventNames, FieldOpts, Validator } from './Field'
 
 
-const eventNames = {
+export const eventNames = {
+  stateChange: 'stateChange',
+  attachFields: 'attach fields',
+  detachFields: 'detach fields',
+  update: 'update',
   change: 'change',
   focus: 'focus',
   blur: 'blur',
-}
+  submit: 'submit',
+} as const
 
 export type FormEventName = typeof eventNames[keyof typeof eventNames]
 
@@ -44,7 +49,7 @@ const defaultOptions: any = {
 
 class Form<FieldValues extends {}> {
 
-  private _events: Events
+  private _events: Events<FormEventName>
   name?: string
   opts: FormOpts<FieldValues>
   fields: FormFields<FieldValues>
@@ -64,7 +69,7 @@ class Form<FieldValues extends {}> {
       isSubmitted: false,
     }
 
-    this._events = new Events()
+    this._events = new Events<FormEventName>()
 
     this._attachFields(this.opts.fields)
   }
@@ -87,35 +92,35 @@ class Form<FieldValues extends {}> {
 
       this.fields[fieldName] = field
 
-      field.on(fieldEventNames.change, () => {
-        this._events.dispatch('change', field)
-      })
+      const eventKeys = [ 'change', 'focus', 'blur' ] as const
 
-      field.on(fieldEventNames.blur, () => {
-        this._events.dispatch('blur', field)
+      eventKeys.forEach((key) => {
+        field.on(fieldEventNames[key], () => {
+          this._events.dispatch(eventNames[key], field)
+        })
       })
     })
   }
 
   attachFields(fieldOpts: FormFieldOpts<FieldValues> | Partial<FormFieldOpts<FieldValues>>): void {
     this._attachFields(fieldOpts)
-    this._events.dispatch('attach fields')
+    this._events.dispatch(eventNames.attachFields)
   }
 
   detachFields(fieldNames: Array<keyof FieldValues>): void {
     fieldNames.forEach((fieldName) => {
       delete this.fields[fieldName]
     })
-    this._events.dispatch('detach fields')
+    this._events.dispatch(eventNames.detachFields)
   }
 
   update(): void {
-    this._events.dispatch('update')
+    this._events.dispatch(eventNames.update)
   }
 
   setState(values: Partial<State>): void {
     this.state = { ...this.state, ...values }
-    this._events.dispatch('state change', this.state)
+    this._events.dispatch(eventNames.stateChange, this.state)
   }
 
   setValues(values: FieldValues): void {
@@ -206,7 +211,7 @@ class Form<FieldValues extends {}> {
       result = Promise.resolve(values)
     }
 
-    this._events.dispatch('submit', errors, values)
+    this._events.dispatch(eventNames.submit, errors, values)
 
     return result
   }
