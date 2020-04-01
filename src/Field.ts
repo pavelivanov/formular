@@ -4,6 +4,18 @@ import Events from './Events'
 import Form from './Form'
 
 
+export const eventNames = {
+  stateChange: 'state change',
+  set: 'set',
+  unset: 'unset',
+  change: 'change',
+  focus: 'focus',
+  blur: 'blur',
+  validate: 'validate',
+} as const
+
+export type FieldEventName = typeof eventNames[keyof typeof eventNames]
+
 export type Validator = (value: any, fields: { [key: string]: Field<any> }) => void
 
 export type FieldOpts<Value> = {
@@ -77,7 +89,7 @@ class Field<Value> {
 
     if (!isEqual) {
       this.state = newState
-      this._events.dispatch('state change', this.state)
+      this._events.dispatch(eventNames.stateChange, this.state)
     }
   }
 
@@ -85,20 +97,26 @@ class Field<Value> {
     this.node = node
 
     if (this.node) {
-      this.node.addEventListener('blur', this.handleBlur)
+      this.node.addEventListener(eventNames.focus, this.handleFocus)
+      this.node.addEventListener(eventNames.blur, this.handleBlur)
     }
   }
 
   unsetRef(): void {
     if (this.node) {
-      this.node.removeEventListener('blur', this.handleBlur)
+      this.node.removeEventListener(eventNames.focus, this.handleFocus)
+      this.node.removeEventListener(eventNames.blur, this.handleBlur)
     }
 
     this.node = undefined
   }
 
+  private handleFocus = () => {
+    this._events.dispatch(eventNames.focus)
+  }
+
   private handleBlur = () => {
-    this._events.dispatch('blur')
+    this._events.dispatch(eventNames.blur)
   }
 
   set(value: any): void {
@@ -110,8 +128,8 @@ class Field<Value> {
         isChanged: true,
       })
 
-      this._events.dispatch('set', this.state.value)
-      this._events.dispatch('change', this.state.value) // @deprecated
+      this._events.dispatch(eventNames.set, this.state.value)
+      this._events.dispatch(eventNames.change, this.state.value) // @deprecated
     }
   }
 
@@ -125,7 +143,7 @@ class Field<Value> {
       isValid: true,
     })
 
-    this._events.dispatch('unset')
+    this._events.dispatch(eventNames.unset)
   }
 
   setError(error: any): void {
@@ -137,8 +155,8 @@ class Field<Value> {
       isValidated: true,
     })
 
-    this._events.dispatch('set', this.state.value)
-    this._events.dispatch('change', this.state.value) // @deprecated
+    this._events.dispatch(eventNames.set, this.state.value)
+    this._events.dispatch(eventNames.change, this.state.value) // @deprecated
   }
 
   validate = (): CancelablePromise => {
@@ -166,7 +184,7 @@ class Field<Value> {
         isValidated: true,
       })
 
-      this._events.dispatch('validate', this.state.error)
+      this._events.dispatch(eventNames.validate, this.state.error)
     }
 
     this.setState({

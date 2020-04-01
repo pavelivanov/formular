@@ -1,10 +1,14 @@
 import Events from './Events'
-import Field, { FieldOpts, Validator } from './Field'
+import Field, { eventNames as fieldEventNames, FieldOpts, Validator } from './Field'
 
 
-type Obj = {
-  [key: string]: any
+const eventNames = {
+  change: 'change',
+  focus: 'focus',
+  blur: 'blur',
 }
+
+export type FormEventName = typeof eventNames[keyof typeof eventNames]
 
 type FormFieldOpts<T> = {
   [K in keyof T]: FieldOpts<T[K]> | Validator[]
@@ -20,6 +24,10 @@ export type FormOpts<T extends object> = {
 
 type FormFields<T extends {}> = {
   [K in keyof T]: Field<T[K]>
+}
+
+type FormErrors<T extends {}> = {
+  [K in keyof T]: any
 }
 
 type State = {
@@ -79,11 +87,11 @@ class Form<FieldValues extends {}> {
 
       this.fields[fieldName] = field
 
-      field.on('change', () => {
+      field.on(fieldEventNames.change, () => {
         this._events.dispatch('change', field)
       })
 
-      field.on('blur', () => {
+      field.on(fieldEventNames.blur, () => {
         this._events.dispatch('blur', field)
       })
     })
@@ -145,8 +153,10 @@ class Form<FieldValues extends {}> {
     })
   }
 
-  setErrors(errors: Obj): void {
-    Object.keys(errors).forEach((fieldName) => {
+  setErrors(errors: FormErrors<FieldValues>): void {
+    const fieldNames = Object.keys(errors) as Array<keyof FieldValues>
+
+    fieldNames.forEach((fieldName) => {
       const field = (this.fields as any)[fieldName]
 
       if (field) {
@@ -155,7 +165,7 @@ class Form<FieldValues extends {}> {
     })
   }
 
-  getErrors(): FieldValues {
+  getErrors(): FormErrors<FieldValues> {
     const fieldNames = Object.keys(this.fields) as Array<keyof FieldValues>
     const errors = {} as FieldValues
 
@@ -201,11 +211,11 @@ class Form<FieldValues extends {}> {
     return result
   }
 
-  on(eventName: string, handler: Function): void {
+  on(eventName: FormEventName, handler: Function): void {
     this._events.subscribe(eventName, handler)
   }
 
-  off(eventName: string, handler: Function): void {
+  off(eventName: FormEventName, handler: Function): void {
     this._events.unsubscribe(eventName, handler)
   }
 }
