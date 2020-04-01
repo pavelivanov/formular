@@ -3,7 +3,7 @@ import Field, { eventNames as fieldEventNames, FieldOpts, Validator } from './Fi
 
 
 export const eventNames = {
-  stateChange: 'stateChange',
+  stateChange: 'state change',
   attachFields: 'attach fields',
   detachFields: 'detach fields',
   update: 'update',
