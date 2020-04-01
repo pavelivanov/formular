@@ -34,7 +34,7 @@ const defaultOptions: any = {
   initialValues: {},
 }
 
-class Form<FieldValues extends object> {
+class Form<FieldValues extends {}> {
 
   private _events: Events
   name?: string
@@ -110,9 +110,11 @@ class Form<FieldValues extends object> {
     this._events.dispatch('state change', this.state)
   }
 
-  setValues(values: Obj): void {
+  setValues(values: FieldValues): void {
+    const fieldNames = Object.keys(values) as Array<keyof FieldValues>
+
     // TODO should we mark form as changed and validate it?
-    Object.keys(values).forEach((fieldName) => {
+    fieldNames.forEach((fieldName) => {
       const field = (this.fields as any)[fieldName]
 
       if (field) {
@@ -121,10 +123,11 @@ class Form<FieldValues extends object> {
     })
   }
 
-  getValues(): Obj {
-    const values: Obj = {}
+  getValues(): FieldValues {
+    const fieldNames = Object.keys(this.fields) as Array<keyof FieldValues>
+    const values = {} as FieldValues
 
-    Object.keys(this.fields).forEach((fieldName) => {
+    fieldNames.forEach((fieldName) => {
       values[fieldName] = (this.fields as any)[fieldName].state.value
     })
 
@@ -152,10 +155,11 @@ class Form<FieldValues extends object> {
     })
   }
 
-  getErrors(): Obj {
-    const errors: Obj = {}
+  getErrors(): FieldValues {
+    const fieldNames = Object.keys(this.fields) as Array<keyof FieldValues>
+    const errors = {} as FieldValues
 
-    Object.keys(this.fields).forEach((fieldName) => {
+    fieldNames.forEach((fieldName) => {
       errors[fieldName] = (this.fields as any)[fieldName].state.error
     })
 
@@ -172,7 +176,7 @@ class Form<FieldValues extends object> {
     return isValid
   }
 
-  async submit(): Promise<object> {
+  async submit(): Promise<FieldValues> {
     // validation takes values on start but user may change form values after this moment and before the validation end
     // so if getValues is called after validate() - values may be different in validation and result of sumbit
     // so we should get form values before async validation
