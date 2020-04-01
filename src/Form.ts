@@ -102,7 +102,7 @@ class Form<FieldValues extends {}> {
     })
   }
 
-  attachFields(fieldOpts: FormFieldOpts<FieldValues> | Partial<FormFieldOpts<FieldValues>>): void {
+  attachFields(fieldOpts: Partial<FormFieldOpts<FieldValues>>): void {
     this._attachFields(fieldOpts)
     this._events.dispatch(eventNames.attachFields)
   }

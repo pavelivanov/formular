@@ -58,7 +58,7 @@ class FormGroup<Forms extends { [key: string]: Form<any> }> {
     })
   }
 
-  attachForms(forms: Forms): void {
+  attachForms(forms: Partial<Forms>): void {
     const formNames = Object.keys(forms) as Array<keyof Forms>
 
     formNames.forEach((formName) => {
@@ -66,9 +66,10 @@ class FormGroup<Forms extends { [key: string]: Form<any> }> {
         console.error(`Form with name "${formName}" already exists in FormGroup`)
       }
       else {
-        this.forms[formName] = forms[formName]
+        this.forms[formName] = forms[formName] as any
       }
     })
+
     this._events.dispatch(eventNames.attachForms)
   }
 
@@ -76,6 +77,7 @@ class FormGroup<Forms extends { [key: string]: Form<any> }> {
     formNames.forEach((fieldName) => {
       delete this.forms[fieldName]
     })
+
     this._events.dispatch(eventNames.detachForms)
   }
 
