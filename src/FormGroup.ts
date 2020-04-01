@@ -7,6 +7,8 @@ const eventNames = {
   replace: 'replace',
   setValues: 'set values',
   unsetValues: 'unset values',
+  attachForms: 'attach forms',
+  detachForms: 'detach forms',
 } as const
 
 export type FormGroupEventName = typeof eventNames[keyof typeof eventNames]
@@ -28,22 +30,11 @@ class FormGroup<Forms extends { [key: string]: Form<any> }> {
     this._subscribe()
   }
 
-  replace(newForms: Forms) {
-    this._unsubscribe()
-
-    this.forms = newForms
-
-    this._subscribe()
-    this._events.dispatch(eventNames.replace)
-  }
-
-  // Private methods ------------------------------------ /
-
-  _handleFormEvent = (eventName: FormEventName) => debounce(() => {
+  private _handleFormEvent = (eventName: FormEventName) => debounce(() => {
     this._events.dispatch(eventName)
   }, 100)
 
-  _subscribe() {
+  private _subscribe() {
     const forms = Object.values(this.forms) as Array<Form<any>>
 
     forms.forEach((form) => {
@@ -55,7 +46,7 @@ class FormGroup<Forms extends { [key: string]: Form<any> }> {
     })
   }
 
-  _unsubscribe() {
+  private _unsubscribe() {
     const forms = Object.values(this.forms) as Array<Form<any>>
 
     forms.forEach((form) => {
@@ -67,7 +58,35 @@ class FormGroup<Forms extends { [key: string]: Form<any> }> {
     })
   }
 
-  // Public methods ------------------------------------- /
+  attachForms(forms: Forms): void {
+    const formNames = Object.keys(forms) as Array<keyof Forms>
+
+    formNames.forEach((formName) => {
+      if (formName in this.forms) {
+        console.error(`Form with name "${formName}" already exists in FormGroup`)
+      }
+      else {
+        this.forms[formName] = forms[formName]
+      }
+    })
+    this._events.dispatch(eventNames.attachForms)
+  }
+
+  detachForms(formNames: Array<keyof Forms>): void {
+    formNames.forEach((fieldName) => {
+      delete this.forms[fieldName]
+    })
+    this._events.dispatch(eventNames.detachForms)
+  }
+
+  replace(newForms: Forms) {
+    this._unsubscribe()
+
+    this.forms = newForms
+
+    this._subscribe()
+    this._events.dispatch(eventNames.replace)
+  }
 
   async validate(): Promise<boolean> {
     const forms     = Object.values(this.forms) as Array<Forms[keyof Forms]>
