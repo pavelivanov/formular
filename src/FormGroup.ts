@@ -13,11 +13,15 @@ const eventNames = {
 
 export type FormGroupEventName = typeof eventNames[keyof typeof eventNames]
 
+type FormFieldValues = {
+  [key: string]: any
+}
+
 type FormsValues<Forms> = {
   [K in keyof Forms]: any
 }
 
-class FormGroup<Forms extends { [key: string]: Form<any> }> {
+class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
 
   private _events: Events<FormGroupEventName | FormEventName>
   forms: Forms
