@@ -31,7 +31,7 @@ type FormFields<T extends {}> = {
   [K in keyof T]: Field<T[K]>
 }
 
-type FormErrors<T extends {}> = {
+export type FormErrors<T extends {}> = {
   [K in keyof T]: any
 }
 

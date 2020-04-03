@@ -1,6 +1,6 @@
 import { debounce } from './util/index'
 import Events from './Events'
-import Form, { eventNames as formEventNames, FormEventName } from './Form'
+import Form, { eventNames as formEventNames, FormEventName, FormErrors } from './Form'
 
 
 const eventNames = {
@@ -13,24 +13,24 @@ const eventNames = {
 
 export type FormGroupEventName = typeof eventNames[keyof typeof eventNames]
 
-type FormFieldValues = {
-  [key: string]: any
+type FormsValues<FormsFieldValues> = {
+  [K in keyof FormsFieldValues]: any
 }
 
-type FormsValues<Forms> = {
-  [K in keyof Forms]: any
+type FormsErrors<FormsFieldValues> = {
+  [K in keyof FormsFieldValues]: FormErrors<FormsFieldValues[K]>
 }
 
-type FormInstances<T> = {
-  [K in keyof T]: Form<T[K]>
+type FormInstances<FormsFieldValues> = {
+  [K in keyof FormsFieldValues]: Form<FormsFieldValues[K]>
 }
 
-class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
+class FormGroup<FormsFieldValues extends {}> {
 
   private _events: Events<FormGroupEventName | FormEventName>
-  forms: FormInstances<Forms>
+  forms: FormInstances<FormsFieldValues>
 
-  constructor(forms?: FormInstances<Forms>) {
+  constructor(forms?: FormInstances<FormsFieldValues>) {
     this._events = new Events<FormGroupEventName | FormEventName>()
     // @ts-ignore
     this.forms = forms || {}
@@ -66,8 +66,8 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
     })
   }
 
-  attachForms(forms: Partial<FormInstances<Forms>>): void {
-    const formNames = Object.keys(forms) as Array<keyof Forms>
+  attachForms(forms: Partial<FormInstances<FormsFieldValues>>): void {
+    const formNames = Object.keys(forms) as Array<keyof FormsFieldValues>
 
     formNames.forEach((formName) => {
       if (formName in this.forms) {
@@ -81,7 +81,7 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
     this._events.dispatch(eventNames.attachForms)
   }
 
-  detachForms(formNames: Array<keyof Forms>): void {
+  detachForms(formNames: Array<keyof FormsFieldValues>): void {
     formNames.forEach((fieldName) => {
       delete this.forms[fieldName]
     })
@@ -89,7 +89,7 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
     this._events.dispatch(eventNames.detachForms)
   }
 
-  replace(newForms: FormInstances<Forms>) {
+  replace(newForms: FormInstances<FormsFieldValues>) {
     this._unsubscribe()
 
     this.forms = newForms
@@ -99,15 +99,15 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
   }
 
   async validate(): Promise<boolean> {
-    const forms     = Object.values(this.forms) as Array<Forms[keyof Forms]>
+    const forms     = Object.values(this.forms) as Array<FormInstances<FormsFieldValues>[keyof FormInstances<FormsFieldValues>]>
     const statuses  = await Promise.all(forms.map((form) => form.validate()))
     const isValid   = statuses.every((isValid) => isValid)
 
     return isValid
   }
 
-  setValues(values: FormsValues<Forms>): void {
-    const formNames = Object.keys(this.forms) as Array<keyof Forms>
+  setValues(values: FormsValues<FormsFieldValues>): void {
+    const formNames = Object.keys(this.forms) as Array<keyof FormsFieldValues>
 
     formNames.forEach((formName) => {
       const form        = this.forms[formName]
@@ -121,9 +121,9 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
     this._events.dispatch('set values')
   }
 
-  getValues(): FormsValues<Forms> {
-    const formNames = Object.keys(this.forms) as Array<keyof Forms>
-    const values = {} as FormsValues<Forms>
+  getValues(): FormsValues<FormsFieldValues> {
+    const formNames = Object.keys(this.forms) as Array<keyof FormsFieldValues>
+    const values = {} as FormsValues<FormsFieldValues>
 
     formNames.forEach((formName) => {
       const form = this.forms[formName]
@@ -135,7 +135,7 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
   }
 
   unsetValues(): void {
-    const formNames = Object.keys(this.forms) as Array<keyof Forms>
+    const formNames = Object.keys(this.forms) as Array<keyof FormsFieldValues>
 
     formNames.forEach((formName) => {
       const form = this.forms[formName]
@@ -147,9 +147,9 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
   }
 
   // TODO looks like getValues() if we need rewrite it? Write getKeyValues(key)
-  getErrors(): FormsValues<Forms> {
-    const formNames = Object.keys(this.forms) as Array<keyof Forms>
-    const errors = {} as FormsValues<Forms>
+  getErrors(): FormsErrors<FormsFieldValues> {
+    const formNames = Object.keys(this.forms) as Array<keyof FormsFieldValues>
+    const errors = {} as FormsErrors<FormsFieldValues>
 
     formNames.forEach((formName) => {
       const form = this.forms[formName]
@@ -160,7 +160,7 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
     return errors
   }
 
-  async submit(): Promise<FormsValues<Forms>> {
+  async submit(): Promise<FormsFieldValues> {
     const isValid = await this.validate()
 
     if (!isValid) {

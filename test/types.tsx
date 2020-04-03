@@ -1,4 +1,4 @@
-import { useFormGroup, useForm } from '../src'
+import { useFormGroup, useForm, FormGroup } from '../src'
 
 
 export type AuthFields = {
@@ -27,6 +27,10 @@ const useForms = () => {
       country: [],
     },
   })
+
+  // return new FormGroup<GroupForms>({
+  //   shipment: shipmentForm,
+  // })
 
   return useFormGroup<GroupForms>({
     shipment: shipmentForm,
