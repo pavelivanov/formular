@@ -3,15 +3,11 @@ import FormGroup from './FormGroup'
 import Form from './Form'
 
 
-type FormFieldValues = {
-  [key: string]: any
-}
-
 type Forms<T> = {
   [K in keyof T]: Form<T[K]>
 }
 
-const useFormGroup = <T extends { [key: string]: FormFieldValues }>(forms: Forms<T>, deps?: any[]) => {
+const useFormGroup = <T extends {}>(forms: Forms<T>, deps?: any[]) => {
   const [ v, update ] = useState(0)
   const form = useMemo(() => new FormGroup(forms), deps || [ v ])
 

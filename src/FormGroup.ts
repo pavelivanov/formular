@@ -21,12 +21,16 @@ type FormsValues<Forms> = {
   [K in keyof Forms]: any
 }
 
+type FormInstances<T> = {
+  [K in keyof T]: Form<T[K]>
+}
+
 class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
 
   private _events: Events<FormGroupEventName | FormEventName>
-  forms: Forms
+  forms: FormInstances<Forms>
 
-  constructor(forms?: Forms) {
+  constructor(forms?: FormInstances<Forms>) {
     this._events = new Events<FormGroupEventName | FormEventName>()
     // @ts-ignore
     this.forms = forms || {}
@@ -62,7 +66,7 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
     })
   }
 
-  attachForms(forms: Partial<Forms>): void {
+  attachForms(forms: Partial<FormInstances<Forms>>): void {
     const formNames = Object.keys(forms) as Array<keyof Forms>
 
     formNames.forEach((formName) => {
@@ -85,7 +89,7 @@ class FormGroup<Forms extends { [key: string]: FormFieldValues }> {
     this._events.dispatch(eventNames.detachForms)
   }
 
-  replace(newForms: Forms) {
+  replace(newForms: FormInstances<Forms>) {
     this._unsubscribe()
 
     this.forms = newForms
