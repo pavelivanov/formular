@@ -2,16 +2,11 @@
 
 Easy way to work with forms in React. Using React Hooks 😏
 
+<p>❤️ Just 3kb gzip</p>
+<p>❤️ React hooks</p>
+<p>❤️ TypeScript</p>
+<p>❤️ Changes made within form rerender only changed fields</p>
 
-## Features
-
-- Just 3kb gzip.
-- React hooks included.
-- Easy way to start work with forms in React in 2 steps: install and use it 😎. 
-- Changes made within form rerender only changed fields not everything unlike in most other form libs.
-
-
-## Quick start
 
 #### Installation
 
@@ -19,73 +14,163 @@ Easy way to work with forms in React. Using React Hooks 😏
 npm install formular
 ```
 
-#### Usage
 
-```jsx harmony
-import { useForm } from 'formular'
-import { Input } from 'formular/lib/tags'
+## Philosophy
 
-const App = () => {
-  const form = useForm({
-    fields: {
-      email: [ required ],
-      password: [ required ],
-    },
-  })
+There are many form libraries that works out of the box - _"import Form, Field and that's it"_. But in most projects common fields are customized by design and usage of Form, Field components become impossible. **Formular** doesn't provide inboxing components for fast start, but it provides easy way to attach form functionality to custimized fields!
 
-  const handleSubmit = useCallback(() => {
-    form.submit()
-      .then((values) => {
-        // { email: "noreply@gmail.com", password: "strongpass" }
-      }, (errors) => {
-        // { email: "Required", password: "Required" }
-      })
-  }, [])  
+For example you have your own styled `Input` component with specific logic inside
 
-  return (
-    <Fragment>
-      <Input field={form.fields.email} />
-      <button onClick={handleSubmit}>Submit</button>
-    </Fragment>
-  )  
+```tsx
+import { useField, useFieldState } from 'formular'
+
+const FormularInput = () => {
+  const field = useField()
+  const state = useFieldState(field)
+
+  return <CustomInput value={state.value} onChange={field.set} />
 }
 ```
 
-Or if you need only one field you can just do
+`useField` is a wrapper for `new Field`:
 
-```jsx harmony
-import { useField } from 'formular'
-import { Input } from 'formular/lib/tags'
+```tsx
+const useField = (opts, deps) => useMemo(() => new Field(opts), deps || [])
+```
 
-const App = () => {
-  const field = useField({
+So when field's state updates FormularSelect doesn't render. Here `useFieldState` comes, it triggers react state update which call component's render.
+
+#### This is Field, and whats about Form?
+
+Lets update the code above to reuse Select component
+
+```tsx
+import { useField, useFieldState } from 'formular'
+
+const FormularInput = ({ field }) => {
+  const state = useFieldState(field)
+
+  return <CustomInput value={state.value} onChange={field.set} />
+}
+
+const Auth = () => {
+  const emailField = useField()
+  const passwordField = useField()
+
+  return (
+    <>
+      <FormularInput field={emailField} />
+      <FormularInput field={passwordField} />
+    </>
+  )
+}
+```
+
+Let's add validators and submit logic
+
+
+```tsx
+
+const required = (value) => {
+  if (!value) {
+    return 'Required'
+  }
+}
+
+const Auth = () => {
+  const emailField = useField({
     validate: [ required ],
   })
-  
-  const handleSubmit = useCallback(() => {
-    form.validate()
-      .then((error) => {
-        // { email: "noreply@gmail.com", password: "strongpass" }
-      })
-  }, [])  
+  const passwordField = useField({
+    validate: [ required ],
+  })
 
+  const handleSubmit = useCallbac(async () => {
+    const isEmailValid = await emailField.validate()
+    const isPasswordValid = await passwordField.validate()
+    
+    const emailValue = emailField.state.value
+    const passwordValue = passwordField.state.value
+    
+    const emailError = emailField.state.error
+    const passwordError = passwordField.state.error
+  }, [])
 
   return (
-    <Fragment>
-      <Input field={field} />
-      <button onClick={handleSubmit}>Submit</button>
-    </Fragment>
-  ) 
+    <>
+      <FormularInput field={emailField} />
+      <FormularInput field={passwordField} />
+      <button onClick={handleSubmit}>Login</button>
+    </>
+  )
 }
 ```
 
-##### Field validation
+Same could be written using `useForm`
 
-```ts
-// validator should return "undefined" if value is valid
+```tsx
+const Auth = () => {
+  const form = useForm({
+    email: [ required ],
+    password: [ required ],
+  })
 
-const required = (value) => !value && value !== 0 ? 'Required' : undefined 
+  const handleSubmit = useCallbac(async () => {
+    const isValid = await form.validate()
+    
+    const values = form.getValues() // { email: '', password: '' }
+    const errors = form.getErrors() // { email: 'Required', password: 'Required' }
+  }, [])
+
+  return (
+    <>
+      <FormularInput field={emailField} />
+      <FormularInput field={passwordField} />
+      <button onClick={handleSubmit}>Login</button>
+    </>
+  )
+}
 ```
+
+in most cases you need submit
+
+```tsx
+const handleSubmit = useCallbac(async () => {
+  try {
+    const values = await form.submit() // { email: '', password: '' }
+  }
+  catch (errors) {} // { email: 'Required', password: 'Required' }
+}, [])
+```
+
+
+### Validation
+
+```
+const required = (value) => {
+  if (!value) {
+    return 'Required'
+  }
+}
+
+const uniqueEmail = async (value) => {
+  const isExist = await fetch(`check-email-exist?email={value}`)
+  
+  if (isExists) {
+    return 'Account with such email already exists'
+  }
+}
+
+const field = useField({
+  validate: [ required, uniqueEmail ]
+})
+
+const isValid = await field.validate()
+```
+
+☝️ `field.validate()` always async!<br />
+☝️ a validator function should return `undefined` if value is valid
+
 
 
 ## Examples
