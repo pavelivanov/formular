@@ -11,10 +11,10 @@ const useForm = <T extends {}>(opts: FormOpts<T>, deps?: any[]) => {
       update((v) => ++v)
     }
 
-    form.on('update', handleUpdate)
+    form.on('force update', handleUpdate)
 
     return () => {
-      form.off('update', handleUpdate)
+      form.off('force update', handleUpdate)
     }
   }, [])
 

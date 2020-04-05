@@ -9,21 +9,21 @@ type Forms<T> = {
 
 const useFormGroup = <T extends {}>(forms: Forms<T>, deps?: any[]) => {
   const [ v, update ] = useState(0)
-  const form = useMemo(() => new FormGroup(forms), deps || [ v ])
+  const formGroup = useMemo(() => new FormGroup(forms), deps || [ v ])
 
   useEffect(() => {
     const handleUpdate = () => {
       update((v) => ++v)
     }
 
-    form.on('update', handleUpdate)
+    formGroup.on('force update', handleUpdate)
 
     return () => {
-      form.off('update', handleUpdate)
+      formGroup.off('force update', handleUpdate)
     }
   }, [])
 
-  return form
+  return formGroup
 }
 
 

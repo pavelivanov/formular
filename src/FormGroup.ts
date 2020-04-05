@@ -9,6 +9,7 @@ const eventNames = {
   unsetValues: 'unset values',
   attachForms: 'attach forms',
   detachForms: 'detach forms',
+  forceUpdate: 'force update',
 } as const
 
 export type FormGroupEventName = typeof eventNames[keyof typeof eventNames]
@@ -79,6 +80,7 @@ class FormGroup<FormsFieldValues extends {}> {
     })
 
     this._events.dispatch(eventNames.attachForms)
+    this.forceUpdate()
   }
 
   detachForms(formNames: Array<keyof FormsFieldValues>): void {
@@ -87,6 +89,7 @@ class FormGroup<FormsFieldValues extends {}> {
     })
 
     this._events.dispatch(eventNames.detachForms)
+    this.forceUpdate()
   }
 
   replace(newForms: FormInstances<FormsFieldValues>) {
@@ -96,6 +99,11 @@ class FormGroup<FormsFieldValues extends {}> {
 
     this._subscribe()
     this._events.dispatch(eventNames.replace)
+    this.forceUpdate()
+  }
+
+  forceUpdate(): void {
+    this._events.dispatch(eventNames.forceUpdate)
   }
 
   async validate(): Promise<boolean> {

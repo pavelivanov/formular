@@ -6,9 +6,8 @@ import Form from './Form'
 
 export const eventNames = {
   stateChange: 'state change',
-  set: 'set',
-  unset: 'unset',
   change: 'change',
+  unset: 'unset',
   focus: 'focus',
   blur: 'blur',
   startValidate: 'start validate',
@@ -129,8 +128,7 @@ class Field<Value> {
         isChanged: true,
       })
 
-      this._events.dispatch(eventNames.set, this.state.value)
-      this._events.dispatch(eventNames.change, this.state.value) // @deprecated
+      this._events.dispatch(eventNames.change, this.state.value)
     }
   }
 
@@ -156,8 +154,7 @@ class Field<Value> {
       isValidated: true,
     })
 
-    this._events.dispatch(eventNames.set, this.state.value)
-    this._events.dispatch(eventNames.change, this.state.value) // @deprecated
+    this._events.dispatch(eventNames.change, this.state.value)
   }
 
   validate = (): CancelablePromise => {
