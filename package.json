@@ -1,7 +1,10 @@
 {
   "name": "formular",
   "version": "2.3.0",
-  "author": "Pavel Ivanov",
+  "author": {
+    "name": "Pavel Ivanov",
+    "email": "grammka@gmail.com"
+  },
   "description": "Build forms in React. Easy-Peasy!",
   "homepage": "https://github.com/pavelivanov/formular#readme",
   "repository": {
@@ -51,6 +54,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^8.1.0",
     "jest": "^24.9.0",
+    "rimraf": "^3.0.2",
     "rollup": "^2.1.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-typescript2": "^0.26.0",
