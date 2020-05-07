@@ -203,18 +203,18 @@ class Form<FieldValues extends {}> {
     // so we should get form values before async validation
     // TODO lock fields on validations start
     const values = this.getValues()
+    // TODO don't validate if all fields are changed and valid
+    const isValid = await this.validate()
+
     let result
     let errors
 
-    // TODO don't validate if all fields are changed and valid
-    await this.validate()
-
-    if (!this.state.isValid) {
-      errors = this.getErrors()
-      result = Promise.reject(errors)
+    if (isValid) {
+      result = Promise.resolve(values)
     }
     else {
-      result = Promise.resolve(values)
+      errors = this.getErrors()
+      result = Promise.reject(errors)
     }
 
     this._events.dispatch(eventNames.submit, errors, values)

@@ -10,6 +10,7 @@ const eventNames = {
   attachForms: 'attach forms',
   detachForms: 'detach forms',
   forceUpdate: 'force update',
+  submit: 'submit',
 } as const
 
 export type FormGroupEventName = typeof eventNames[keyof typeof eventNames]
@@ -126,7 +127,7 @@ class FormGroup<FormsFieldValues extends {}> {
       }
     })
 
-    this._events.dispatch('set values')
+    this._events.dispatch(eventNames.setValues)
   }
 
   getValues(): FormsValues<FormsFieldValues> {
@@ -151,7 +152,7 @@ class FormGroup<FormsFieldValues extends {}> {
       form.unsetValues()
     })
 
-    this._events.dispatch('unset values')
+    this._events.dispatch(eventNames.unsetValues)
   }
 
   // TODO looks like getValues() if we need rewrite it? Write getKeyValues(key)
@@ -172,15 +173,27 @@ class FormGroup<FormsFieldValues extends {}> {
   }
 
   async submit(): Promise<FormsFieldValues> {
+    // validation takes values on start but user may change form values after this moment and before the validation end
+    // so if getValues is called after validate() - values may be different in validation and result of sumbit
+    // so we should get form values before async validation
+    // TODO lock fields on validations start
+    const values = this.getValues()
     const isValid = await this.validate()
 
-    if (!isValid) {
-      const errors = this.getErrors()
+    let result
+    let errors
 
-      return Promise.reject(errors)
+    if (isValid) {
+      result = Promise.resolve(values)
+    }
+    else {
+      errors = this.getErrors()
+      result = Promise.reject(errors)
     }
 
-    return this.getValues()
+    this._events.dispatch(eventNames.submit, errors, values)
+
+    return result
   }
 
   on(eventName: FormGroupEventName | FormEventName, handler: Function): void {
