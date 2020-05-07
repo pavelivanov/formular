@@ -8,8 +8,8 @@ type Forms<T> = {
 }
 
 const useFormGroup = <T extends {}>(forms: Forms<T>, deps?: any[]) => {
-  const [ v, update ] = useState(0)
-  const formGroup = useMemo(() => new FormGroup(forms), deps || [ v ])
+  const [ _, update ] = useState(0)
+  const formGroup = useMemo(() => new FormGroup(forms), deps || [])
 
   useEffect(() => {
     const handleUpdate = () => {

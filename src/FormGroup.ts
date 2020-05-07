@@ -81,7 +81,6 @@ class FormGroup<FormsFieldValues extends {}> {
     })
 
     this._events.dispatch(eventNames.attachForms)
-    this.forceUpdate()
   }
 
   detachForms(formNames: Array<keyof FormsFieldValues>): void {
@@ -90,7 +89,6 @@ class FormGroup<FormsFieldValues extends {}> {
     })
 
     this._events.dispatch(eventNames.detachForms)
-    this.forceUpdate()
   }
 
   replace(newForms: FormInstances<FormsFieldValues>) {

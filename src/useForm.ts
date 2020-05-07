@@ -3,8 +3,8 @@ import Form, { FormOpts } from './Form'
 
 
 const useForm = <T extends {}>(opts: FormOpts<T>, deps?: any[]) => {
-  const [ v, update ] = useState(0)
-  const form = useMemo(() => new Form(opts), deps || [ v ])
+  const [ _, update ] = useState(0)
+  const form = useMemo(() => new Form(opts), deps || [])
 
   useEffect(() => {
     const handleUpdate = () => {

@@ -105,7 +105,6 @@ class Form<FieldValues extends {}> {
   attachFields(fieldOpts: Partial<FormFieldOpts<FieldValues>>): void {
     this._attachFields(fieldOpts)
     this._events.dispatch(eventNames.attachFields)
-    this.forceUpdate()
   }
 
   detachFields(fieldNames: Array<keyof FieldValues>): void {
@@ -113,7 +112,6 @@ class Form<FieldValues extends {}> {
       delete this.fields[fieldName]
     })
     this._events.dispatch(eventNames.detachFields)
-    this.forceUpdate()
   }
 
   forceUpdate(): void {
