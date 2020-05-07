@@ -152,6 +152,22 @@ describe('form', () => {
       expect(error2).toBe('Must be a valid street address')
     })
 
+    it('should return empty errors', async () => {
+      await form.validate()
+      const errors = form.getErrors()
+
+      expect(errors).toBe(null)
+    })
+
+    it('should return fields errors', async () => {
+      form.fields.address.set('Wrong address # $')
+
+      await form.validate()
+      const errors = form.getErrors()
+
+      expect(errors).toStrictEqual({ address: 'Must be a valid street address' })
+    })
+
   })
 })
 
@@ -215,6 +231,48 @@ describe('form group', () => {
     expect(formGroup.forms.shipping.getValues()).toEqual(expectedValues.shipping)
     expect(formGroup.forms.billing.getValues()).toEqual(expectedValues.billing)
     expect(formGroup.forms.creditCard.getValues()).toEqual(expectedValues.creditCard)
+  })
+
+  it('should return empty errors', async () => {
+    const values = {
+      shipping: {
+        address: 'Los Angeles',
+      },
+      billing: {
+        address: 'Los Angeles',
+      },
+      creditCard: {
+        cardNumber: '4242424242424242',
+      },
+    }
+
+    formGroup.setValues(values)
+
+    await formGroup.validate()
+    const errors = formGroup.getErrors()
+
+    expect(errors).toBe(null)
+  })
+
+  it('should return fields errors', async () => {
+    const values = {
+      shipping: {
+        address: 'Wrong address # $',
+      },
+      billing: {
+        address: 'Los Angeles',
+      },
+      creditCard: {
+        cardNumber: '4242424242424242',
+      },
+    }
+
+    formGroup.setValues(values)
+
+    await formGroup.validate()
+    const errors = formGroup.getErrors()
+
+    expect(errors).toStrictEqual({ shipping: { address: 'Must be a valid street address' } })
   })
 
 })

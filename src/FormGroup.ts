@@ -19,7 +19,7 @@ type FormsValues<FormsFieldValues> = {
 }
 
 type FormsErrors<FormsFieldValues> = {
-  [K in keyof FormsFieldValues]: FormErrors<FormsFieldValues[K]>
+  [K in keyof FormsFieldValues]: FormErrors<FormsFieldValues[K]> | null
 }
 
 type FormInstances<FormsFieldValues> = {
@@ -155,17 +155,20 @@ class FormGroup<FormsFieldValues extends {}> {
   }
 
   // TODO looks like getValues() if we need rewrite it? Write getKeyValues(key)
-  getErrors(): FormsErrors<FormsFieldValues> {
+  getErrors(): FormsErrors<FormsFieldValues> | null {
     const formNames = Object.keys(this.forms) as Array<keyof FormsFieldValues>
     const errors = {} as FormsErrors<FormsFieldValues>
 
     formNames.forEach((formName) => {
       const form = this.forms[formName]
+      const formErrors = form.getErrors()
 
-      errors[formName] = form.getErrors()
+      if (formErrors) {
+        errors[formName] = formErrors
+      }
     })
 
-    return errors
+    return Object.keys(errors).length ? errors : null
   }
 
   async submit(): Promise<FormsFieldValues> {

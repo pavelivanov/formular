@@ -172,15 +172,19 @@ class Form<FieldValues extends {}> {
     })
   }
 
-  getErrors(): FormErrors<FieldValues> {
+  getErrors(): FormErrors<FieldValues> | null {
     const fieldNames = Object.keys(this.fields) as Array<keyof FieldValues>
     const errors = {} as FieldValues
 
     fieldNames.forEach((fieldName) => {
-      errors[fieldName] = (this.fields as any)[fieldName].state.error
+      const error = (this.fields as any)[fieldName].state.error
+
+      if (error) {
+        errors[fieldName] = error
+      }
     })
 
-    return errors
+    return Object.keys(errors).length ? errors : null
   }
 
   async validate(): Promise<boolean> {
