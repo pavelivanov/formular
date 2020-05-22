@@ -1,3 +1,4 @@
+import React from 'react'
 import equal from 'fast-deep-equal'
 import { asyncSome, debounce, CancelablePromise } from './util'
 import Events from './Events'
@@ -20,7 +21,7 @@ export type Validator = (value: any, fields: { [key: string]: Field<any> }) => v
 
 export type FieldOpts<Value> = {
   name?: string
-  node?: HTMLElement
+  node?: HTMLInputElement
   value?: Value
   validate?: Validator[]
   readOnly?: boolean
@@ -41,7 +42,7 @@ class Field<Value> {
   form?: Form<any>
   name?: string
   opts: FieldOpts<Value>
-  node?: HTMLElement
+  node?: HTMLInputElement
   validators: Validator[]
   readOnly: boolean
   debounceValidate: Function
@@ -83,6 +84,26 @@ class Field<Value> {
     // ))
   }
 
+  // React methods
+
+  ref = (node: HTMLInputElement) => {
+    this.node = node
+  }
+
+  onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.set(event.currentTarget.value)
+  }
+
+  onFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    this.handleFocus(event)
+  }
+
+  onBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    this.handleBlur(event)
+  }
+
+  // Common methods
+
   setState(values: Partial<State<Value>>): void {
     const newState = { ...this.state, ...values }
     const isEqual = equal(this.state, newState)
@@ -93,7 +114,7 @@ class Field<Value> {
     }
   }
 
-  setRef(node: HTMLElement): void {
+  setRef(node: HTMLInputElement): void {
     this.node = node
 
     if (this.node) {
@@ -111,12 +132,12 @@ class Field<Value> {
     this.node = undefined
   }
 
-  private handleFocus = () => {
-    this._events.dispatch(eventNames.focus)
+  private handleFocus = (event: FocusEvent | React.FocusEvent<HTMLInputElement>) => {
+    this._events.dispatch(eventNames.focus, event)
   }
 
-  private handleBlur = () => {
-    this._events.dispatch(eventNames.blur)
+  private handleBlur = (event: FocusEvent | React.FocusEvent<HTMLInputElement>) => {
+    this._events.dispatch(eventNames.blur, event)
   }
 
   set(value: any): void {
