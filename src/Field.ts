@@ -47,6 +47,12 @@ class Field<Value> {
   readOnly: boolean
   debounceValidate: Function
   state: State<Value>
+  props: {
+    ref: (node: HTMLInputElement) => void
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    onFocus: (event: FocusEvent | React.FocusEvent<HTMLInputElement>) => void
+    onBlur: (event: FocusEvent | React.FocusEvent<HTMLInputElement>) => void
+  }
 
   private _events: Events<FieldEventName>
   private _initialValue: any
@@ -74,6 +80,13 @@ class Field<Value> {
       isValid: true,
     }
 
+    this.props = {
+      ref: (node) => this.node = node,
+      onChange: (event) => this.set(event.currentTarget.value),
+      onFocus: this.handleFocus,
+      onBlur: this.handleBlur,
+    }
+
     this._events              = new Events<FieldEventName>()
     this._initialValue        = this.state.value
     this._cancelablePromise   = null
@@ -82,24 +95,6 @@ class Field<Value> {
     // this.hasAsyncValidators = this.validators.some((validator) => (
     //   validator.constructor.name === 'AsyncFunction'
     // ))
-  }
-
-  // React methods
-
-  ref = (node: HTMLInputElement) => {
-    this.node = node
-  }
-
-  onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.set(event.currentTarget.value)
-  }
-
-  onFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    this.handleFocus(event)
-  }
-
-  onBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    this.handleBlur(event)
   }
 
   // Common methods
