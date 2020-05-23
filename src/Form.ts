@@ -79,16 +79,16 @@ class Form<FieldValues extends {}> {
 
     fieldNames.forEach((fieldName) => {
       const initialValue = this.opts.initialValues && this.opts.initialValues[fieldName]
-      let fieldOpts: FieldOpts<FieldValues[typeof fieldName]> | Validator[] = this.opts.fields[fieldName]
+      let opts: any = fieldOpts[fieldName]
 
-      fieldOpts = Array.isArray(fieldOpts) ? { validate: fieldOpts } : fieldOpts
-      fieldOpts.name = fieldName as string
+      opts = Array.isArray(opts) ? { validate: opts } : opts
+      opts.name = fieldName as string
 
       if (typeof initialValue !== 'undefined') {
-        fieldOpts.value = initialValue
+        opts.value = initialValue
       }
 
-      const field = new Field<FieldValues[typeof fieldName]>(fieldOpts, this)
+      const field = new Field<FieldValues[typeof fieldName]>(opts, this)
 
       this.fields[fieldName] = field
 
