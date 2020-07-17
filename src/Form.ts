@@ -126,7 +126,7 @@ class Form<FieldValues extends {}> {
     this._events.dispatch(eventNames.stateChange, this.state)
   }
 
-  setValues(values: FieldValues): void {
+  setValues(values: Partial<FieldValues>): void {
     const fieldNames = Object.keys(values) as Array<keyof FieldValues>
 
     // TODO should we mark form as changed and validate it?

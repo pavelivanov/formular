@@ -115,7 +115,7 @@ class FormGroup<FormsFieldValues extends {}> {
     return isValid
   }
 
-  setValues(values: FormsValues<FormsFieldValues>): void {
+  setValues(values: FormsValues<Partial<FormsFieldValues>>): void {
     const formNames = Object.keys(this.forms) as Array<keyof FormsFieldValues>
 
     formNames.forEach((formName) => {
