@@ -41,7 +41,7 @@ class Field<Value> {
 
   form?: Form<any>
   name?: string
-  opts: FieldOpts<Value>
+  opts?: FieldOpts<Value>
   node?: HTMLInputElement
   validators: Validator[]
   readOnly: boolean
@@ -62,17 +62,17 @@ class Field<Value> {
     return value === undefined || value === null ? '' : value
   }
 
-  constructor(opts: FieldOpts<Value> = {}, form?: Form<any>) {
+  constructor(opts?: FieldOpts<Value>, form?: Form<any>) {
     this.form                 = form
-    this.opts                 = opts
-    this.name                 = opts.name
-    this.node                 = opts.node
-    this.readOnly             = opts.readOnly || false
-    this.validators           = opts.validate || []
+    this.opts                 = opts || {}
+    this.name                 = this.opts.name
+    this.node                 = this.opts.node
+    this.readOnly             = this.opts.readOnly || false
+    this.validators           = this.opts.validate || []
     this.debounceValidate     = this.opts.validationDelay ? debounce(this.validate, this.opts.validationDelay) : this.validate
 
     this.state = {
-      value: Field.modifyValue(opts.value),
+      value: Field.modifyValue(this.opts.value),
       error: null,
       isChanged: false,
       isValidating: false,
