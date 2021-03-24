@@ -172,28 +172,23 @@ class FormGroup<FormsFieldValues extends {}> {
     return Object.keys(errors).length ? errors : null
   }
 
-  async submit(): Promise<FormsFieldValues> {
+  async submit(): Promise<{ values: FormsValues<FormsFieldValues>, errors: FormsErrors<FormsFieldValues> | null }> {
     // validation takes values on start but user may change form values after this moment and before the validation end
     // so if getValues is called after validate() - values may be different in validation and result of sumbit
     // so we should get form values before async validation
     // TODO lock fields on validations start
     const values = this.getValues()
-    const isValid = await this.validate()
 
-    let result
-    let errors
+    await this.validate()
 
-    if (isValid) {
-      result = Promise.resolve(values)
-    }
-    else {
-      errors = this.getErrors()
-      result = Promise.reject(errors)
-    }
+    const errors = this.getErrors()
 
     this._events.dispatch(eventNames.submit, errors, values)
 
-    return result
+    return {
+      values,
+      errors,
+    }
   }
 
   on(eventName: FormGroupEventName | FormEventName, handler: Function): void {
