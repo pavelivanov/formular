@@ -4,8 +4,8 @@ import useFieldState from './useFieldState'
 
 
 type FieldStateProps = {
-  children: (state: State<any>) => React.ReactElement
-  field: Field<any>
+  children: (state: State) => React.ReactElement
+  field: Field
 }
 
 const FieldState: React.FunctionComponent<FieldStateProps> = ({ children, field }) => {

@@ -16,7 +16,7 @@ export const eventNames = {
 export type FormEventName = typeof eventNames[keyof typeof eventNames]
 
 type FormFieldOpts<T> = {
-  [K in keyof T]: FieldOpts<T[K]> | Validator[]
+  [K in keyof T]: FieldOpts | Validator[]
 }
 
 export type FormOpts<T extends {}> = {
@@ -28,7 +28,7 @@ export type FormOpts<T extends {}> = {
 }
 
 type FormFields<T extends {}> = {
-  [K in keyof T]: Field<T[K]>
+  [K in keyof T]: Field
 }
 
 export type FormErrors<T extends {}> = {
@@ -88,7 +88,7 @@ class Form<FieldValues extends {}> {
         opts.value = initialValue
       }
 
-      const field = new Field<FieldValues[typeof fieldName]>(opts, this)
+      const field = new Field(opts, this)
 
       this.fields[fieldName] = field
 

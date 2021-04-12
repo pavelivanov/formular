@@ -17,19 +17,19 @@ export const eventNames = {
 
 export type FieldEventName = typeof eventNames[keyof typeof eventNames]
 
-export type Validator = (value: any, fields: { [key: string]: Field<any> }) => void
+export type Validator = (value: any, fields: { [key: string]: Field }) => void
 
-export type FieldOpts<Value> = {
+export type FieldOpts = {
   name?: string
   node?: HTMLInputElement
-  value?: Value
+  value?: string
   validate?: Validator[]
   readOnly?: boolean
   validationDelay?: number
 }
 
-export type State<Value> = {
-  value: Value
+export type State = {
+  value: string
   error: any
   isChanged: boolean
   isValidating: boolean
@@ -37,16 +37,16 @@ export type State<Value> = {
   isValid: boolean
 }
 
-class Field<Value> {
+class Field {
 
   form?: Form<any>
   name?: string
-  opts?: FieldOpts<Value>
+  opts?: FieldOpts
   node?: HTMLInputElement
   validators: Validator[]
   readOnly: boolean
   debounceValidate: Function
-  state: State<Value>
+  state: State
   props: {
     ref: (node: HTMLInputElement) => void
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
@@ -58,11 +58,11 @@ class Field<Value> {
   private _initialValue: any
   private _cancelablePromise: CancelablePromise | null
 
-  static modifyValue(value: any): any {
-    return typeof value === 'string' ? value : ''
+  static modifyValue(value: string): string {
+    return typeof value === 'string' ? value : String(value)
   }
 
-  constructor(opts?: FieldOpts<Value>, form?: Form<any>) {
+  constructor(opts?: FieldOpts, form?: Form<object>) {
     this.form                 = form
     this.opts                 = opts || {}
     this.name                 = this.opts.name
@@ -72,7 +72,7 @@ class Field<Value> {
     this.debounceValidate     = this.opts.validationDelay ? debounce(this.validate, this.opts.validationDelay) : this.validate
 
     this.state = {
-      value: Field.modifyValue(this.opts.value),
+      value: Field.modifyValue(this.opts.value as string),
       error: null,
       isChanged: false,
       isValidating: false,
@@ -99,7 +99,7 @@ class Field<Value> {
 
   // Common methods
 
-  setState(values: Partial<State<Value>>): void {
+  setState(values: Partial<State>): void {
     const newState = { ...this.state, ...values }
     const isEqual = equal(this.state, newState)
 

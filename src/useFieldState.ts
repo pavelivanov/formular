@@ -4,7 +4,7 @@ import Field from './Field'
 import useForceUpdate from './useForceUpdate'
 
 
-const useFieldState = <T extends any>(field: Field<T>) => {
+const useFieldState = (field: Field) => {
   const forceUpdate = useForceUpdate()
 
   useEffect(() => {
