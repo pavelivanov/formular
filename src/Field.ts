@@ -59,7 +59,7 @@ class Field<Value> {
   private _cancelablePromise: CancelablePromise | null
 
   static modifyValue(value: any): any {
-    return value === undefined || value === null ? '' : value
+    return typeof value === 'string' ? value : ''
   }
 
   constructor(opts?: FieldOpts<Value>, form?: Form<any>) {
