@@ -146,7 +146,7 @@ class Field<Value> {
         isChanged: true,
       })
 
-      if (silent) {
+      if (!silent) {
         this._events.dispatch(eventNames.change, this.state.value)
       }
     }
