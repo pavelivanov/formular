@@ -261,7 +261,7 @@ type FieldEntity = {
   setState(values: Partial<State>): void
   setRef(node: HTMLElement): void
   unsetRef(): void
-  set(value: any): void
+  set(value: any, opts?: { silent: boolean }): void
   unset(): void
   validate = (): CancelablePromise
   on(eventName: string, handler: Function): void
@@ -270,6 +270,8 @@ type FieldEntity = {
 
 const field: FieldEntity = useField(opts)
 ```
+
+**Note:** `{ silent: true }` in field.set doesn't trigger events.
 
 
 ## Events

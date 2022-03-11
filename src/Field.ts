@@ -135,7 +135,9 @@ class Field<Value> {
     this._events.dispatch(eventNames.blur, event)
   }
 
-  set(value: any): void {
+  set(value: any, opts?: { silent: boolean }): void {
+    const { silent } = opts || {}
+
     const modifiedValue = Field.modifyValue(value)
 
     if (modifiedValue !== this.state.value && !this.readOnly) {
@@ -144,7 +146,9 @@ class Field<Value> {
         isChanged: true,
       })
 
-      this._events.dispatch(eventNames.change, this.state.value)
+      if (silent) {
+        this._events.dispatch(eventNames.change, this.state.value)
+      }
     }
   }
 
