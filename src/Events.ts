@@ -12,20 +12,14 @@ class Event {
    * Add handler to current Event
    */
   addHandler(handler: Function) {
-    this.handlers.push(handler.bind({
-      unsubscribe: () => {
-        this.removeHandler(handler)
-      },
-    }))
+    this.handlers.push(handler)
   }
 
   /**
    * Remove handler from current Event
    */
   removeHandler(handler: Function) {
-    const handlerIndex = this.handlers.indexOf(handler)
-
-    this.handlers.splice(handlerIndex, 1)
+    this.handlers = this.handlers.filter((h) => h !== handler)
   }
 
   /**
@@ -50,8 +44,7 @@ class EventAggregator<EventName extends string> {
   }
 
   constructor() {
-    // @ts-ignore
-    this.events = {}
+    this.events = {} as Record<EventName, Event>
   }
 
   /**
@@ -68,16 +61,18 @@ class EventAggregator<EventName extends string> {
     return event
   }
 
-  subscribe(name: EventName, handler: Function): { event: Event, handler: Function } {
+  subscribe(name: EventName, handler: Function): () => void {
     const event = this.getEvent(name)
 
     event.addHandler(handler)
 
-    return { event, handler }
+    return () => {
+      this.unsubscribe(name, handler)
+    }
   }
 
-  unsubscribe(eventName: EventName, handler: Function) {
-    const event = this.getEvent(eventName)
+  unsubscribe(name: EventName, handler: Function) {
+    const event = this.getEvent(name)
 
     event.removeHandler(handler)
   }
