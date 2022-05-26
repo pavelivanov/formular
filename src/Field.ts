@@ -146,6 +146,12 @@ class Field<Value> {
         isChanged: true,
       })
 
+      if (this.form) {
+        this.form.setState({
+          isChanged: true,
+        })
+      }
+
       if (!silent) {
         this._events.dispatch(eventNames.change, this.state.value)
       }
