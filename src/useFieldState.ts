@@ -13,7 +13,7 @@ const useFieldState = <T extends any>(field: Field<T>) => {
     return () => {
       field.off('state change', forceUpdate)
     }
-  }, [])
+  }, [ field ])
 
   return field.state
 }
