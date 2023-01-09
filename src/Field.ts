@@ -7,6 +7,7 @@ import Form from './Form'
 
 export const eventNames = {
   stateChange: 'state change',
+  valueChange: 'value change',
   change: 'change',
   unset: 'unset',
   focus: 'focus',
@@ -147,6 +148,7 @@ class Field<Value> {
       })
 
       if (!silent) {
+        this._events.dispatch(eventNames.valueChange, this.state.value)
         this._events.dispatch(eventNames.change, this.state.value)
       }
     }
