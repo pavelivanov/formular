@@ -166,6 +166,10 @@ class Field<Value> {
   }
 
   setError(error: any): void {
+    if (error === this.state.error) {
+      return
+    }
+
     this.setState({
       error,
       isChanged: true,
