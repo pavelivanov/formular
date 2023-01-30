@@ -82,7 +82,7 @@ class Form<FieldValues extends {}> {
       let opts: any = fieldOpts[fieldName]
 
       opts = Array.isArray(opts) ? { validate: opts } : opts
-      opts.name = fieldName as string
+      opts.name = fieldOpts[fieldName].name ?? fieldName as string
 
       if (typeof initialValue !== 'undefined') {
         opts.value = initialValue
