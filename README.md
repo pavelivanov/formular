@@ -111,8 +111,10 @@ Same could be written using `useForm`
 ```tsx
 const Auth = () => {
   const form = useForm({
-    email: [ required ],
-    password: [ required ],
+    fields: {
+      email: [ required ],
+      password: [ required ],
+    },
   })
 
   const handleSubmit = useCallbac(async () => {
