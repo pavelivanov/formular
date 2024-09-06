@@ -85,7 +85,7 @@ const Auth = () => {
     validate: [ required ],
   })
 
-  const handleSubmit = useCallbac(async () => {
+  const handleSubmit = useCallback(async () => {
     const isEmailValid = await emailField.validate()
     const isPasswordValid = await passwordField.validate()
     
@@ -117,7 +117,7 @@ const Auth = () => {
     },
   })
 
-  const handleSubmit = useCallbac(async () => {
+  const handleSubmit = useCallback(async () => {
     const isValid = await form.validate()
     
     const values = form.getValues() // { email: '', password: '' }
@@ -137,7 +137,7 @@ const Auth = () => {
 in most cases you need submit
 
 ```tsx
-const handleSubmit = useCallbac(async () => {
+const handleSubmit = useCallback(async () => {
   try {
     const values = await form.submit() // { email: '', password: '' }
   }
