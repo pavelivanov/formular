@@ -213,6 +213,49 @@ Hook helpers (`useFormState`, `useField`, `useFieldRegister`) wire the right
 subscriptions for you — reach for raw `form.on` only for side effects
 outside the render tree.
 
+## Nested paths
+
+Field names are dotted paths typed against your form shape. You can register
+fields at any depth:
+
+```tsx
+type Contact = {
+  name: string
+  address: {
+    street: string
+    city: string
+    zip: { code: string }
+  }
+}
+
+function AddressFields() {
+  const street = useFieldRegister<Contact>('address.street', { required: true })
+  const code = useFieldRegister<Contact>('address.zip.code')
+  // street: FieldManager<string>
+  // code:   FieldManager<string>
+  // …
+}
+```
+
+`setValues` and `setInitialValues` take a `DeepPartial` shape — the walker
+hands each subtree to the registered field at that path, or keeps
+recursing until it finds one (or hits a leaf, in which case the value is
+buffered until a field registers):
+
+```ts
+form.setValues({ address: { street: '42 Elm' } })
+// applies to the 'address.street' field, leaves everything else untouched
+```
+
+`getValues()` reconstructs the nested shape. `getErrors()` and the submit
+result use dotted-path keys (`{ 'address.street': '...' }`) so they're
+stable for UI lookup.
+
+If you register a whole-object field (`useFieldRegister<T>('address')`),
+`setValues({ address: {...} })` hands the whole object to that field
+instead of descending. Mix granular and whole-object fields however suits
+your form.
+
 ## Dynamic & conditional fields
 
 Fields register when their component mounts and unregister on unmount.

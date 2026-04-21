@@ -3,6 +3,8 @@ import equal from 'fast-deep-equal'
 import EventEmitter from './util/EventEmitter'
 
 import { FieldManager } from './FieldManager'
+import type { DeepPartial, Path, PathValue } from './paths'
+import { isPlainObject, setByPath } from './paths'
 import type { FieldOptions, FormState, ReadonlyField } from './types'
 
 export const eventNames = {
@@ -17,9 +19,12 @@ export const eventNames = {
 export type FormEventName = (typeof eventNames)[keyof typeof eventNames]
 export type FormEventMap = Record<FormEventName, (...args: any[]) => void>
 
-export type FormFields<FieldValues extends Record<string, any>> = {
-  [K in keyof FieldValues]: FieldManager<FieldValues[K]>
-}
+/**
+ * Map of every registered field, keyed by its dotted path. The value-type
+ * of individual entries is erased here — use `Form.getField(path)` to get a
+ * typed `FieldManager<PathValue<T, P>>`.
+ */
+export type FormFields = Record<string, FieldManager<any>>
 
 export type SubmitResult<FieldValues extends Record<string, any>> = {
   values: FieldValues
@@ -34,7 +39,7 @@ export type SubmitErrorContext<FieldValues extends Record<string, any>> =
 
 export type FormOptions<FieldValues extends Record<string, any>> = {
   formId?: string
-  initialValues?: Partial<FieldValues>
+  initialValues?: DeepPartial<FieldValues>
   /**
    * Called by submit() once validation has passed. If you drive submission
    * via form.handleSubmit(cb), prefer passing the callback there and leave
@@ -54,14 +59,15 @@ export type FormOptions<FieldValues extends Record<string, any>> = {
 
 export class Form<FieldValues extends Record<string, any>> {
   private _events: EventEmitter<FormEventMap>
-  private _fields: FormFields<FieldValues> = {} as any
+  private _fields: Map<string, FieldManager<any>> = new Map()
   private _fieldUnsubscribers: Map<string, () => void> = new Map()
   private _fieldRegistrationCounts: Map<string, number> = new Map()
   private _isReseeding = false
-  // Values queued by setValues() / setInitialValues() for field names that
-  // haven't registered yet. Consumed and cleared in registerField().
-  private _pendingValues: Partial<FieldValues> = {}
-  private _pendingInitialValues: Partial<FieldValues> = {}
+  // Values queued by setValues() / setInitialValues() for field paths that
+  // haven't registered yet. Keyed by dotted path. Consumed and cleared in
+  // registerField().
+  private _pendingValues: Record<string, unknown> = {}
+  private _pendingInitialValues: Record<string, unknown> = {}
   private _pendingErrors: Record<string, string | null> = {}
   private _batchDepth = 0
   private _pendingFormStateUpdate: { skipOnChange: boolean } | null = null
@@ -98,13 +104,15 @@ export class Form<FieldValues extends Record<string, any>> {
     }
   }
 
-  registerField<K extends keyof FieldValues>(
-    name: K,
-    options: FieldOptions<FieldValues[K]> = {},
-    preferredField?: FieldManager<FieldValues[K]>,
-  ): FieldManager<FieldValues[K]> {
+  registerField<P extends Path<FieldValues>>(
+    name: P,
+    options: FieldOptions<PathValue<FieldValues, P>> = {},
+    preferredField?: FieldManager<PathValue<FieldValues, P>>,
+  ): FieldManager<PathValue<FieldValues, P>> {
     const fieldKey = String(name)
-    const existing = this._fields[name]
+    const existing = this._fields.get(fieldKey) as
+      | FieldManager<PathValue<FieldValues, P>>
+      | undefined
     if (existing) {
       existing.updateOptions(options)
       this._fieldRegistrationCounts.set(
@@ -119,23 +127,25 @@ export class Form<FieldValues extends Record<string, any>> {
     //   setInitialValues() buffered initial >
     //   constructor initialValues >
     //   options.defaultValue
-    const hasPending = name in this._pendingValues
-    const hasPendingInitial = name in this._pendingInitialValues
-    const hasConstructorInitial = this._options.initialValues?.[name] !== undefined
+    const hasPending = fieldKey in this._pendingValues
+    const hasPendingInitial = fieldKey in this._pendingInitialValues
+    const constructorInitial = this._resolveConstructorInitial(fieldKey)
+    const hasConstructorInitial = constructorInitial.found
 
-    const seedInitial: FieldValues[K] = hasPendingInitial
-      ? (this._pendingInitialValues[name] as FieldValues[K])
+    type V = PathValue<FieldValues, P>
+    const seedInitial: V = hasPendingInitial
+      ? (this._pendingInitialValues[fieldKey] as V)
       : hasConstructorInitial
-        ? (this._options.initialValues![name] as FieldValues[K])
-        : (options.defaultValue as FieldValues[K])
+        ? (constructorInitial.value as V)
+        : (options.defaultValue as V)
 
-    const fieldOptions: FieldOptions<FieldValues[K]> = {
+    const fieldOptions: FieldOptions<V> = {
       ...options,
       defaultValue: seedInitial,
     }
 
     const field =
-      preferredField ?? new FieldManager<FieldValues[K]>(String(name), fieldOptions)
+      preferredField ?? new FieldManager<V>(fieldKey, fieldOptions)
 
     if (preferredField) {
       field.updateOptions(fieldOptions)
@@ -143,35 +153,35 @@ export class Form<FieldValues extends Record<string, any>> {
     }
 
     field._attachFieldsProvider(() => this._getFieldsForValidators())
-    this._fields[name] = field
+    this._fields.set(fieldKey, field as FieldManager<any>)
     this._fieldRegistrationCounts.set(fieldKey, 1)
 
     const unsubscribe = field.subscribe(() => {
       this._requestFormStateUpdate({ skipOnChange: this._isReseeding })
     })
-    this._fieldUnsubscribers.set(String(name), unsubscribe)
+    this._fieldUnsubscribers.set(fieldKey, unsubscribe)
 
     if (hasPending) {
-      field.setValue(this._pendingValues[name] as FieldValues[K])
-      delete this._pendingValues[name]
+      field.setValue(this._pendingValues[fieldKey] as V)
+      delete this._pendingValues[fieldKey]
     }
     if (hasPendingInitial) {
-      delete this._pendingInitialValues[name]
+      delete this._pendingInitialValues[fieldKey]
     }
     if (Object.prototype.hasOwnProperty.call(this._pendingErrors, fieldKey)) {
       field.setError(this._pendingErrors[fieldKey] ?? null)
       delete this._pendingErrors[fieldKey]
     }
 
-    this._events.emit(eventNames.fieldRegistered, name, field)
+    this._events.emit(eventNames.fieldRegistered, fieldKey, field)
     this._requestFormStateUpdate({ skipOnChange: true })
 
     return field
   }
 
-  unregisterField<K extends keyof FieldValues>(name: K): void {
+  unregisterField<P extends Path<FieldValues>>(name: P): void {
     const fieldKey = String(name)
-    const field = this._fields[name]
+    const field = this._fields.get(fieldKey)
     if (!field) return
 
     const registrations = this._fieldRegistrationCounts.get(fieldKey) ?? 0
@@ -186,61 +196,59 @@ export class Form<FieldValues extends Record<string, any>> {
     this._fieldUnsubscribers.delete(fieldKey)
 
     field.destroy()
-    delete this._fields[name]
-    this._events.emit(eventNames.fieldUnregistered, name)
+    this._fields.delete(fieldKey)
+    this._events.emit(eventNames.fieldUnregistered, fieldKey)
     this._requestFormStateUpdate({ skipOnChange: true })
   }
 
-  getField<K extends keyof FieldValues>(
-    name: K,
-  ): FieldManager<FieldValues[K]> | undefined {
-    return this._fields[name]
+  getField<P extends Path<FieldValues>>(
+    name: P,
+  ): FieldManager<PathValue<FieldValues, P>> | undefined {
+    return this._fields.get(String(name)) as
+      | FieldManager<PathValue<FieldValues, P>>
+      | undefined
   }
 
-  getAllFields(): FormFields<FieldValues> {
-    return { ...this._fields }
+  getAllFields(): FormFields {
+    return Object.fromEntries(this._fields)
   }
 
   getValues(): FieldValues {
-    const values: FieldValues = {} as any
-    ;(Object.keys(this._fields) as Array<keyof FieldValues>).forEach((name) => {
-      values[name] = this._fields[name].getValue()
+    const out: Record<string, any> = {}
+    this._fields.forEach((field, path) => {
+      setByPath(out, path, field.getValue())
     })
-    return values
+    return out as FieldValues
   }
 
-  setValues(values: Partial<FieldValues>): void {
-    ;(Object.keys(values) as Array<keyof FieldValues>).forEach((name) => {
-      const field = this._fields[name]
-      if (field) {
-        field.setValue(values[name] as FieldValues[typeof name])
-      }
-      else {
-        this._pendingValues[name] = values[name]
-      }
-    })
+  /**
+   * Apply values to registered fields. Accepts a deep-partial shape —
+   * objects are walked recursively until a registered field is found at
+   * that path, at which point the whole subtree is handed off. Paths that
+   * don't correspond to any registered field are buffered and applied
+   * when/if they register.
+   */
+  setValues(values: DeepPartial<FieldValues>): void {
+    this._applyToFields(values as unknown, '', 'setValue')
   }
 
-  setInitialValues(values: Partial<FieldValues>): void {
+  /**
+   * Re-seed initial (reset) values. Same walk semantics as setValues, but
+   * applies to each field's initial value rather than current value. For
+   * already-registered fields that have not been edited, the current value
+   * is also updated (so the UI reflects the hydration).
+   */
+  setInitialValues(values: DeepPartial<FieldValues>): void {
+    // Merge into stored options so future reset() picks up the new seeds.
     this._options = {
       ...this._options,
-      initialValues: { ...this._options.initialValues, ...values },
+      initialValues: this._mergeDeep(this._options.initialValues, values),
     }
 
     this._isReseeding = true
     try {
       this._batch(() => {
-        ;(Object.keys(values) as Array<keyof FieldValues>).forEach((name) => {
-          const field = this._fields[name]
-          const next = values[name] as FieldValues[typeof name]
-          if (field) {
-            field._replaceInitialValue(next)
-          }
-          else {
-            this._pendingInitialValues[name] = next
-          }
-        })
-
+        this._applyToFields(values as unknown, '', 'setInitial')
         this._requestFormStateUpdate({ skipOnChange: true })
       })
     }
@@ -251,30 +259,28 @@ export class Form<FieldValues extends Record<string, any>> {
 
   getErrors(): Record<string, string> {
     const errors: Record<string, string> = {}
-    ;(Object.keys(this._fields) as Array<keyof FieldValues>).forEach((name) => {
-      const error = this._fields[name].state.error
-      if (error) {
-        errors[String(name)] = error
-      }
+    this._fields.forEach((field, path) => {
+      const error = field.state.error
+      if (error) errors[path] = error
     })
     return errors
   }
 
   setErrors(errors: Record<string, string | null>): void {
     this._batch(() => {
-      Object.keys(errors).forEach((name) => {
-        const field = this._fields[name]
+      Object.keys(errors).forEach((path) => {
+        const field = this._fields.get(path)
         if (field) {
-          field.setError(errors[name])
+          field.setError(errors[path])
           return
         }
 
-        if (errors[name] === null) {
-          delete this._pendingErrors[name]
+        if (errors[path] === null) {
+          delete this._pendingErrors[path]
           return
         }
 
-        this._pendingErrors[name] = errors[name]
+        this._pendingErrors[path] = errors[path]
       })
     })
   }
@@ -282,7 +288,7 @@ export class Form<FieldValues extends Record<string, any>> {
   async validate(): Promise<boolean> {
     this.setState({ isValidating: true })
 
-    const fields = Object.values(this._fields) as FieldManager<any>[]
+    const fields = Array.from(this._fields.values())
     await Promise.all(fields.map((field) => field.validate()))
 
     const isValid = fields.every((field) => field.state.isValid)
@@ -353,9 +359,7 @@ export class Form<FieldValues extends Record<string, any>> {
 
   reset(): void {
     this._batch(() => {
-      Object.values(this._fields).forEach((field) => {
-        ;(field as FieldManager<any>).reset()
-      })
+      this._fields.forEach((field) => field.reset())
 
       this._pendingValues = {}
       this._pendingErrors = {}
@@ -380,10 +384,80 @@ export class Form<FieldValues extends Record<string, any>> {
     this._events.emit(eventNames.stateChange, this._state)
   }
 
+  private _applyToFields(
+    value: unknown,
+    prefix: string,
+    mode: 'setValue' | 'setInitial',
+  ): void {
+    // If a field is registered exactly at this prefix, hand off the whole
+    // subtree regardless of its shape (so { address: {...} } goes to an
+    // 'address' field if one exists).
+    if (prefix) {
+      const field = this._fields.get(prefix)
+      if (field) {
+        if (mode === 'setValue') {
+          field.setValue(value)
+        }
+        else {
+          field._replaceInitialValue(value)
+        }
+        return
+      }
+    }
+
+    if (isPlainObject(value)) {
+      for (const [ key, sub ] of Object.entries(value)) {
+        const nextPath = prefix ? `${prefix}.${key}` : key
+        this._applyToFields(sub, nextPath, mode)
+      }
+      return
+    }
+
+    // Leaf at an unregistered prefix — buffer.
+    if (!prefix) return // don't buffer the whole root
+    if (mode === 'setValue') {
+      this._pendingValues[prefix] = value
+    }
+    else {
+      this._pendingInitialValues[prefix] = value
+    }
+  }
+
+  private _resolveConstructorInitial(path: string): {
+    found: boolean
+    value: unknown
+  } {
+    const initial = this._options.initialValues as Record<string, any> | undefined
+    if (!initial) return { found: false, value: undefined }
+
+    const parts = path.split('.')
+    let cursor: any = initial
+    for (const part of parts) {
+      if (cursor === null || typeof cursor !== 'object') {
+        return { found: false, value: undefined }
+      }
+      if (!(part in cursor)) return { found: false, value: undefined }
+      cursor = cursor[part]
+    }
+    return { found: true, value: cursor }
+  }
+
+  private _mergeDeep(
+    target: any,
+    source: any,
+  ): any {
+    if (!isPlainObject(source)) return source
+    const out: Record<string, any> = isPlainObject(target) ? { ...target } : {}
+    for (const [ key, val ] of Object.entries(source)) {
+      out[key] = isPlainObject(val) ? this._mergeDeep(out[key], val) : val
+    }
+    return out
+  }
+
   private _updateFormState(opts: { skipOnChange?: boolean } = {}): void {
     const values = this.getValues()
     const errors = this.getErrors()
-    const fields = Object.values(this._fields) as FieldManager<any>[]
+    const fields = Array.from(this._fields.values())
     const isValid = fields.every((field) => field.state.isValid)
     const isChanged = fields.some((field) => field.state.isChanged)
     const isValidating = fields.some((field) => field.state.isValidating)
@@ -401,7 +475,7 @@ export class Form<FieldValues extends Record<string, any>> {
     this._state = next
 
     if (!opts.skipOnChange && valuesChanged) {
-      this._options.onChange?.(values)
+      this._options.onChange?.(values as FieldValues)
       this._events.emit(eventNames.change, values)
     }
 
@@ -444,8 +518,8 @@ export class Form<FieldValues extends Record<string, any>> {
 
   private _getFieldsForValidators(): Record<string, ReadonlyField<unknown>> {
     const out: Record<string, ReadonlyField<unknown>> = {}
-    ;(Object.keys(this._fields) as Array<keyof FieldValues>).forEach((k) => {
-      out[String(k)] = this._fields[k]
+    this._fields.forEach((field, path) => {
+      out[path] = field
     })
     return out
   }
@@ -480,10 +554,8 @@ export class Form<FieldValues extends Record<string, any>> {
     this._fieldUnsubscribers.forEach((unsub) => unsub())
     this._fieldUnsubscribers.clear()
     this._fieldRegistrationCounts.clear()
-    Object.values(this._fields).forEach((field) =>
-      (field as FieldManager<any>).destroy(),
-    )
-    this._fields = {} as any
+    this._fields.forEach((field) => field.destroy())
+    this._fields.clear()
     this._pendingValues = {}
     this._pendingInitialValues = {}
     this._pendingErrors = {}

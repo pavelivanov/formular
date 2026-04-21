@@ -1,5 +1,43 @@
 # Changelog
 
+## 4.0.0-alpha.3 — unreleased
+
+### Added
+
+- **Typed nested paths.** `useFieldRegister<T>('address.street')` now accepts
+  any dotted path into `T`; the returned `FieldManager` is typed as
+  `PathValue<T, 'address.street'>`. Same for `form.registerField`,
+  `form.getField`, `form.unregisterField`.
+- `Path<T>`, `PathValue<T, P>`, and `DeepPartial<T>` exported from the entry.
+- `setValues` / `setInitialValues` accept `DeepPartial<FieldValues>` and walk
+  the shape down to each registered field. Registering a whole-object field
+  (e.g. `'address'`) short-circuits recursion for that subtree.
+- `getValues()` reconstructs the nested object from the flat storage; keys
+  that weren't registered don't appear in the result.
+- `getErrors()` and the `submit()` error payload use dotted-path keys
+  (`{ 'address.street': '...' }`).
+
+### Changed
+
+- Internal field storage moved from a per-key indexed object to
+  `Map<string, FieldManager<any>>` keyed by dotted path. The public
+  `FormFields` export is now `Record<string, FieldManager<any>>` — the
+  previous per-key typing no longer made sense once nesting was introduced.
+  Use `getField(path)` for the typed variant.
+- Constructor `initialValues` typed as `DeepPartial<FieldValues>` (was
+  `Partial`); can be set at any depth.
+
+### Fixed
+
+- `_resolveConstructorInitial` walks the dotted path through
+  `options.initialValues`, so nested constructor seeds apply correctly to
+  nested fields (previously only top-level keys were read).
+
+### Bundle
+
+- ESM entry: 4.93 KB brotli (+270 B from alpha.2). Tree-shaken core: 3.93 KB.
+  All size budgets still green.
+
 ## 4.0.0-alpha.2 — unreleased
 
 ### Added

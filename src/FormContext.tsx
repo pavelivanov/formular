@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 import type { FormOptions } from './Form'
 import { Form } from './Form'
+import type { DeepPartial } from './paths'
 
 const FormContext = createContext<Form<any> | null>(null)
 
@@ -41,7 +42,7 @@ export function FormContextProvider<FieldValues extends Record<string, any>>({
     }
     if (equal(lastInitialRef.current, initialValues)) return
     lastInitialRef.current = initialValues
-    form.setInitialValues((initialValues ?? {}) as Partial<FieldValues>)
+    form.setInitialValues((initialValues ?? {}) as DeepPartial<FieldValues>)
   }, [ form, initialValues ])
 
   useEffect(() => {

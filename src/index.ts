@@ -56,3 +56,4 @@ export type {
   StandardSchemaV1Issue,
   StandardSchemaV1Result,
 } from './standard-schema'
+export type { DeepPartial, Path, PathValue } from './paths'

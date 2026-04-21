@@ -4,16 +4,23 @@ import { FieldManager } from './FieldManager'
 import type { Form } from './Form'
 import { eventNames } from './Form'
 import { useFormContext } from './FormContext'
+import type { Path, PathValue } from './paths'
 import type { FieldOptions } from './types'
 
-const pendingFieldsByForm = new WeakMap<Form<any>, Map<string, FieldManager<any>>>()
+// Loose form type used for internal, already-erased hook plumbing.
+// `Path<Record<string, any>>` collapses to `string`, so getField/registerField
+// accept any string path inside the hook bodies without forcing users to
+// downgrade their typed form at the call site.
+type AnyForm = Form<Record<string, any>>
+
+const pendingFieldsByForm = new WeakMap<AnyForm, Map<string, FieldManager<any>>>()
 
 function getOrCreateField(
-  form: Form<any>,
+  form: AnyForm,
   name: string,
   options: FieldOptions<any>,
 ): FieldManager<any> {
-  const existing = form.getField<any>(name)
+  const existing = form.getField(name)
   if (existing) {
     return existing
   }
@@ -35,7 +42,7 @@ function getOrCreateField(
   return created
 }
 
-function clearPendingField(form: Form<any>, name: string): void {
+function clearPendingField(form: AnyForm, name: string): void {
   const pendingByName = pendingFieldsByForm.get(form)
   if (!pendingByName) return
 
@@ -63,12 +70,13 @@ export function useFormState() {
  * Register a field on the ambient form.
  *
  * Prefer the first overload — pass your form's value type as the generic
- * argument so the field `name` is constrained to `keyof FieldValues` and the
- * returned `FieldManager` is typed as `FieldManager<FieldValues[K]>`:
+ * argument. The `name` is constrained to `Path<FieldValues>` (including
+ * dotted nested paths), and the returned `FieldManager` is typed as
+ * `FieldManager<PathValue<FieldValues, P>>`:
  *
  * ```ts
- * const field = useFieldRegister<BrandFormFields>('name', { required: true });
- * // field: FieldManager<BrandFormFields['name']>
+ * const street = useFieldRegister<BrandFormFields>('address.street');
+ * // street: FieldManager<BrandFormFields['address']['street']>
  * ```
  *
  * The second overload (raw value type) is kept for cases where a field
@@ -76,8 +84,11 @@ export function useFormState() {
  */
 export function useFieldRegister<
   FieldValues extends Record<string, any>,
-  K extends Extract<keyof FieldValues, string> = Extract<keyof FieldValues, string>,
->(name: K, options?: FieldOptions<FieldValues[K]>): FieldManager<FieldValues[K]>
+  P extends Path<FieldValues> = Path<FieldValues>,
+>(
+  name: P,
+  options?: FieldOptions<PathValue<FieldValues, P>>,
+): FieldManager<PathValue<FieldValues, P>>
 export function useFieldRegister<T = any>(
   name: string,
   options?: FieldOptions<T>,
@@ -86,7 +97,7 @@ export function useFieldRegister(
   name: string,
   options: FieldOptions<any> = {},
 ): FieldManager<any> {
-  const form = useForm()
+  const form = useForm() as AnyForm
   const field = getOrCreateField(form, name, options)
 
   useEffect(() => {
@@ -95,7 +106,7 @@ export function useFieldRegister(
 
     return () => {
       form.unregisterField(name)
-      if (!form.getField<any>(name)) {
+      if (!form.getField(name)) {
         clearPendingField(form, name)
       }
     }
@@ -125,13 +136,13 @@ function useFieldUpdates(field: FieldManager<any> | undefined) {
 export function useField<T = any>(name: string): FieldManager<T> | undefined {
   const form = useForm()
   const [ field, setField ] = useState<FieldManager<T> | undefined>(() =>
-    form.getField<any>(name),
+    (form as AnyForm).getField(name),
   )
   useFieldUpdates(field)
 
   useEffect(() => {
     const syncField = () => {
-      const next = form.getField<any>(name)
+      const next = (form as AnyForm).getField(name)
       setField((prev) => (prev === next ? prev : next))
     }
 
