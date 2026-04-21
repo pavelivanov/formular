@@ -4,11 +4,13 @@
 > class graph wired together by an event emitter; React components subscribe
 > via hooks and opt in to re-renders only for the slice they care about.
 
-[![npm](https://img.shields.io/npm/v/formular.svg)](https://www.npmjs.com/package/formular)
+[![npm](https://img.shields.io/npm/v/formular/next.svg?label=next)](https://www.npmjs.com/package/formular)
+[![npm](https://img.shields.io/npm/v/formular.svg?label=latest)](https://www.npmjs.com/package/formular)
 
-**v4 is a complete rewrite** and is currently shipping as an alpha. The
-stable v3.x line remains published on npm. See [CHANGELOG.md](./CHANGELOG.md)
-for the full migration guide.
+**v4 is a ground-up rewrite**, currently published under the `next`
+dist-tag. The stable v3.x line remains on `latest`. See
+[MIGRATION.md](./MIGRATION.md) for v3 → v4 and
+[CHANGELOG.md](./CHANGELOG.md) for the release notes.
 
 ## Why
 
@@ -29,12 +31,15 @@ Current bundle: **~6.8 KB gzip (ESM)**, including 15 built-in validators.
 ## Install
 
 ```bash
+# Try v4 (beta):
 npm install formular@next
+
+# Stay on v3 (stable):
+npm install formular
 ```
 
-Peer: `react >=18`.
-
-A runnable end-to-end example lives at [examples/vite-react](./examples/vite-react).
+Peer: `react >=18` for v4. A runnable end-to-end example lives at
+[examples/vite-react](./examples/vite-react).
 
 ## Basic usage
 
