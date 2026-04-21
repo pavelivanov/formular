@@ -30,37 +30,37 @@ Current bundle: **~6.8 KB gzip (ESM)**, including 15 built-in validators.
 
 ```bash
 npm install formular@next
-# or
-npm install formular@4.0.0-alpha.1
 ```
 
 Peer: `react >=18`.
 
+A runnable end-to-end example lives at [examples/vite-react](./examples/vite-react).
+
 ## Basic usage
 
+Use `createForm<T>()` once per form shape. It returns a stable bundle of
+hooks (plus the Provider) with your value type closed over — each call
+site just passes a literal path and TypeScript narrows from there:
+
 ```tsx
-import {
-  FormContextProvider,
-  FieldError,
-  FieldLabel,
-  useFieldRegister,
-  useFormContext,
-  useFormState,
-} from 'formular'
+import { FieldError, FieldLabel, createForm } from 'formular'
 
 type ContactForm = {
   name: string
   email: string
 }
 
+const contact = createForm<ContactForm>()
+
 function NameField() {
-  const field = useFieldRegister<ContactForm>('name', { required: true })
+  const field = contact.useFieldRegister('name', { required: true })
+  //    ^? FieldManager<string>
 
   return (
     <div>
       <FieldLabel field={field}>Name</FieldLabel>
       <input
-        value={field.state.value}
+        value={field.state.value ?? ''}
         onChange={(e) => field.setValue(e.target.value)}
         aria-invalid={!!field.state.error}
       />
@@ -70,8 +70,8 @@ function NameField() {
 }
 
 function SubmitButton() {
-  const form = useFormContext<ContactForm>()
-  const { isSubmitting, isValid } = useFormState()
+  const form = contact.useForm()
+  const { isSubmitting, isValid } = contact.useFormState()
 
   return (
     <button
@@ -85,13 +85,17 @@ function SubmitButton() {
 
 export function ContactFormPage() {
   return (
-    <FormContextProvider<ContactForm> initialValues={{ name: '', email: '' }}>
+    <contact.FormContextProvider initialValues={{ name: '', email: '' }}>
       <NameField />
       <SubmitButton />
-    </FormContextProvider>
+    </contact.FormContextProvider>
   )
 }
 ```
+
+If you just need an ad-hoc field outside a typed form contract, the
+direct `useFieldRegister<T>(name)` / `useFieldArray<Item>(path)` hooks
+are still exported and take a plain string path.
 
 ## API
 

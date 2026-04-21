@@ -1,0 +1,222 @@
+:root {
+  --bg: #0b0c10;
+  --surface: #14161d;
+  --surface-elevated: #1a1d28;
+  --text: #e8eaf0;
+  --text-dim: #8a8fa3;
+  --accent: #6ea8fe;
+  --accent-active: #5391fa;
+  --danger: #ff6b6b;
+  --border: #242834;
+  --radius: 8px;
+  font-family:
+    system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+p.lede {
+  margin: 0 0 32px;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+p.lede code {
+  color: var(--text);
+  background: var(--surface);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12.5px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--surface);
+  padding: 24px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px 18px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--surface-elevated);
+}
+
+legend {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  padding: 0 6px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.field label .req {
+  color: var(--danger);
+  margin-left: 2px;
+}
+
+.field input,
+.field textarea {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 120ms ease;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field input[aria-invalid='true'],
+.field textarea[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.field .err {
+  color: var(--danger);
+  font-size: 12.5px;
+  min-height: 1em;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.row .remove {
+  align-self: stretch;
+}
+
+.tags-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+button {
+  background: var(--accent);
+  color: #07101e;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    transform 60ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--accent-active);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+button.ghost:hover:not(:disabled) {
+  background: var(--surface-elevated);
+  color: var(--text);
+}
+
+button.danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+button.danger:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+pre.output {
+  margin: 24px 0 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  overflow-x: auto;
+  color: var(--text-dim);
+}
+
+pre.output .ok {
+  color: #6ec48a;
+}
+
+.submit-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}

@@ -1,5 +1,40 @@
 # Changelog
 
+## 4.0.0-alpha.5 — unreleased
+
+### Added
+
+- **`createForm<T>()` factory** is the new primary way to get fully typed
+  hooks bound to a form shape. Call it once at module scope; the returned
+  object carries `FormContextProvider`, `useForm`, `useFormContext`,
+  `useFormState`, `useFormValidation`, `useFieldRegister`, `useFieldArray`,
+  and `useField`, each narrowed against `T`. `useFieldRegister('address.zip')`
+  now infers `FieldManager<string>` with no extra type arguments.
+
+  Background: TypeScript doesn't narrow `const` type parameters when a
+  caller supplies only *some* explicit generics — so the previous
+  `useFieldRegister<ContactForm>('name')` shape always widened the
+  returned field's value type to the full union of every path value.
+  Closing the form shape over a factory eliminates the partial-explicit
+  case entirely.
+
+- **`examples/vite-react`** — runnable contact form exercising nested
+  paths, `useFieldArray`, Zod schemas (including an async `.refine(…)`),
+  and the submit lifecycle. Links from the root README.
+
+### Changed (breaking — alpha)
+
+- Dropped the typed `<FieldValues, P>` overload from the direct
+  `useFieldRegister` and `useFieldArray` hooks. The remaining overloads
+  take a plain string path plus a single `<T>` or `<Item>` generic for
+  the field value type. Ad-hoc / untyped use cases are unchanged; typed
+  forms should migrate to `createForm<T>()`.
+
+### Bundle
+
+- ESM entry: 5.55 KB brotli (+180 B for `createForm`). Tree-shaken core:
+  3.96 KB. All size budgets intact.
+
 ## 4.0.0-alpha.4 — unreleased
 
 ### Added

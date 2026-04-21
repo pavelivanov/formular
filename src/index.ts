@@ -2,6 +2,8 @@
 export { FormContextProvider, useFormContext } from './FormContext'
 export { FieldManager } from './FieldManager'
 export { eventNames, Form } from './Form'
+export { createForm } from './createForm'
+export type { FormOf, TypedForm } from './createForm'
 
 // Hooks
 export {

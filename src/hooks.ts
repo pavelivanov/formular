@@ -4,7 +4,6 @@ import { FieldManager } from './FieldManager'
 import type { Form } from './Form'
 import { eventNames } from './Form'
 import { useFormContext } from './FormContext'
-import type { Path, PathValue } from './paths'
 import type { FieldOptions } from './types'
 
 // Loose form type used for internal, already-erased hook plumbing.
@@ -69,26 +68,18 @@ export function useFormState() {
 /**
  * Register a field on the ambient form.
  *
- * Prefer the first overload — pass your form's value type as the generic
- * argument. The `name` is constrained to `Path<FieldValues>` (including
- * dotted nested paths), and the returned `FieldManager` is typed as
- * `FieldManager<PathValue<FieldValues, P>>`:
+ * For fully-typed paths and inferred value types, prefer the hooks
+ * returned by {@link createForm} — TypeScript's partial-explicit-generic
+ * inference doesn't narrow literal paths here when both `FieldValues`
+ * and the path generic are in play.
+ *
+ * This direct hook is the "ad-hoc" escape hatch: pass a `T` for the
+ * field's value type; the `name` is a plain string.
  *
  * ```ts
- * const street = useFieldRegister<BrandFormFields>('address.street');
- * // street: FieldManager<BrandFormFields['address']['street']>
+ * const field = useFieldRegister<string>('ad-hoc-field')
  * ```
- *
- * The second overload (raw value type) is kept for cases where a field
- * exists outside a typed form contract — e.g. ad-hoc drawers.
  */
-export function useFieldRegister<
-  FieldValues extends Record<string, any>,
-  P extends Path<FieldValues> = Path<FieldValues>,
->(
-  name: P,
-  options?: FieldOptions<PathValue<FieldValues, P>>,
-): FieldManager<PathValue<FieldValues, P>>
 export function useFieldRegister<T = any>(
   name: string,
   options?: FieldOptions<T>,

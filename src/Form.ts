@@ -104,7 +104,7 @@ export class Form<FieldValues extends Record<string, any>> {
     }
   }
 
-  registerField<P extends Path<FieldValues>>(
+  registerField<const P extends Path<FieldValues>>(
     name: P,
     options: FieldOptions<PathValue<FieldValues, P>> = {},
     preferredField?: FieldManager<PathValue<FieldValues, P>>,
@@ -179,7 +179,7 @@ export class Form<FieldValues extends Record<string, any>> {
     return field
   }
 
-  unregisterField<P extends Path<FieldValues>>(name: P): void {
+  unregisterField<const P extends Path<FieldValues>>(name: P): void {
     const fieldKey = String(name)
     const field = this._fields.get(fieldKey)
     if (!field) return
@@ -201,7 +201,7 @@ export class Form<FieldValues extends Record<string, any>> {
     this._requestFormStateUpdate({ skipOnChange: true })
   }
 
-  getField<P extends Path<FieldValues>>(
+  getField<const P extends Path<FieldValues>>(
     name: P,
   ): FieldManager<PathValue<FieldValues, P>> | undefined {
     return this._fields.get(String(name)) as

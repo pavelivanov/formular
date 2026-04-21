@@ -21,7 +21,7 @@ type Capture = {
 
 function TagsHost({ onReady }: { onReady: (capture: Capture) => void }) {
   const form = useForm<Values>()
-  const api = useFieldArray<Values>('tags', { defaultValue: [] })
+  const api = useFieldArray<string>('tags', { defaultValue: [] })
 
   useEffect(() => {
     onReady({ api, form })

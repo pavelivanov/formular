@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react'
 
 import { useFieldRegister } from './hooks'
-import type { ArrayPath, PathValue } from './paths'
 import type { FieldOptions } from './types'
 
 export interface FieldArrayItem<Item> {
@@ -30,8 +29,6 @@ export interface UseFieldArrayReturn<Item> {
   clear: () => void
 }
 
-type ArrayElement<T> = T extends ReadonlyArray<infer U> ? U : never
-
 // Module-local monotonic counter. Combined with a timestamp this gives us
 // unique IDs without pulling in a uuid library or assuming crypto.randomUUID
 // (which is unavailable on older Node).
@@ -54,14 +51,11 @@ const nextId = (): string => `${idPrefix}-${++idCounter}`
  * This hook deliberately does NOT manage sub-field registrations at
  * `items.<N>.*` paths — if you need per-row field state beyond schema
  * validation, register those fields yourself.
+ *
+ * For typed paths bound to your form shape, prefer the hook returned by
+ * {@link createForm}. This direct hook is the ad-hoc form — pass `Item`
+ * explicitly.
  */
-export function useFieldArray<
-  FieldValues extends Record<string, any>,
-  P extends ArrayPath<FieldValues> = ArrayPath<FieldValues>,
->(
-  path: P,
-  options?: FieldOptions<PathValue<FieldValues, P>>,
-): UseFieldArrayReturn<ArrayElement<PathValue<FieldValues, P>>>
 export function useFieldArray<Item = any>(
   path: string,
   options?: FieldOptions<Item[]>,

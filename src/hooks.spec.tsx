@@ -19,7 +19,7 @@ function CaptureForm({ onCapture }: { onCapture: (form: Form<Values>) => void })
 }
 
 function Registrar() {
-  useFieldRegister<Values>('name', { defaultValue: '' });
+  useFieldRegister<string>('name', { defaultValue: '' });
   return null;
 }
 
