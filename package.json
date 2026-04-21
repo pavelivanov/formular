@@ -1,6 +1,6 @@
 {
   "name": "formular",
-  "version": "4.0.0-alpha.5",
+  "version": "4.0.0-alpha.6",
   "author": {
     "name": "Pavel Ivanov",
     "email": "grammka@gmail.com"
@@ -57,18 +57,18 @@
     {
       "name": "ESM entry (everything)",
       "path": "dist/index.js",
-      "limit": "6 kB"
+      "limit": "6.5 kB"
     },
     {
       "name": "CJS entry (everything)",
       "path": "dist/index.cjs",
-      "limit": "6.5 kB"
+      "limit": "7 kB"
     },
     {
       "name": "Tree-shaken core (Form + Provider + hooks)",
       "path": "dist/index.js",
       "import": "{ Form, useFieldRegister, useFormState, FormContextProvider }",
-      "limit": "4.5 kB"
+      "limit": "5 kB"
     }
   ],
   "peerDependencies": {

@@ -96,7 +96,10 @@ export function useFieldRegister(
     clearPendingField(form, name)
 
     return () => {
-      form.unregisterField(name)
+      // Pass `field` so an out-of-order cleanup with a stale name closure
+      // doesn't destroy an unrelated field that was moved to this path by
+      // a concurrent useFieldArray reindex.
+      form.unregisterField(name, field)
       if (!form.getField(name)) {
         clearPendingField(form, name)
       }

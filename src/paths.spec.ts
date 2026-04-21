@@ -73,6 +73,35 @@ describe('paths: runtime helpers', () => {
     expect(obj).toEqual({ a: { b: { c: 1, d: 2 }, e: 3 }, f: 4 })
   })
 
+  test('setByPath materialises numeric segments as arrays', () => {
+    const obj: Record<string, any> = {}
+    setByPath(obj, 'rows.0.name', 'a')
+    setByPath(obj, 'rows.2.name', 'c')
+    expect(Array.isArray(obj.rows)).toBe(true)
+    expect(obj.rows).toEqual([ { name: 'a' }, undefined, { name: 'c' } ])
+  })
+
+  test('setByPath does not mutate caller-owned arrays or objects', () => {
+    // Regression test for the getValues() bug: when Form.getValues seeded
+    // out.rows from a whole-array field and then wrote sub-field paths,
+    // setByPath was mutating the live field's array in place.
+    const liveArray = [ { name: 'x' }, { name: 'y' } ]
+    const liveRow = liveArray[0]!
+
+    const out: Record<string, any> = {}
+    setByPath(out, 'rows', liveArray)
+    setByPath(out, 'rows.0.name', 'EDITED')
+    setByPath(out, 'rows.2.name', 'ADDED')
+
+    expect(liveArray).toHaveLength(2)
+    expect(liveArray[0]).toBe(liveRow)
+    expect(liveArray[0]?.name).toBe('x')
+    expect(liveArray[1]?.name).toBe('y')
+
+    expect(out.rows[0].name).toBe('EDITED')
+    expect(out.rows[2].name).toBe('ADDED')
+  })
+
   test('isPlainObject recognises plain objects only', () => {
     expect(isPlainObject({})).toBe(true)
     expect(isPlainObject({ a: 1 })).toBe(true)

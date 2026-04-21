@@ -256,11 +256,19 @@ straight into `key=`. The hook keys on the array path as a single field,
 so `form.setValues({ tags: [...] })` stays the source of truth and
 external mutations still reach the UI.
 
-**Not handled automatically:** sub-field registrations at
-`items.<N>.*` paths. If you register `useFieldRegister<Form>('items.0.name')`
-the hook won't reindex that path when you `remove(0)`. For per-row
-validation today, prefer a schema (Zod `z.array(z.object({...}))`) over
-individual sub-fields.
+**Per-row sub-fields are reindexed automatically.** If a component
+registers `useFieldRegister<Item>('items.2.name')` and the user calls
+`remove(1)`, the field's internal state (value, error, touched) is
+carried over to `items.1.name` — the FieldManager instance is preserved,
+only its path changes. `swap`, `move`, `insert`, `prepend` behave the
+same. `replace` and `clear` destroy all sub-fields at that array path;
+newly-mounted rows register fresh.
+
+Subscribers can observe the shift via the `field renamed` event:
+
+```ts
+form.on('field renamed', (oldPath, newPath) => { … })
+```
 
 ## Nested paths
 

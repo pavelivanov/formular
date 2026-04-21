@@ -11,6 +11,7 @@ export const eventNames = {
   stateChange: 'state change',
   fieldRegistered: 'field registered',
   fieldUnregistered: 'field unregistered',
+  fieldRenamed: 'field renamed',
   change: 'change',
   submit: 'submit',
   submitError: 'submit error',
@@ -115,9 +116,14 @@ export class Form<FieldValues extends Record<string, any>> {
       | undefined
     if (existing) {
       existing.updateOptions(options)
+      // Default to 0 (not 1): after an array reindex the field is present
+      // but the registration count was cleared, and the consumer's
+      // useEffect is about to re-register for the first time at the new
+      // path. Before the rename machinery existed, count was guaranteed
+      // to be >= 1 when this branch ran, so `?? 0` is backwards-safe.
       this._fieldRegistrationCounts.set(
         fieldKey,
-        (this._fieldRegistrationCounts.get(fieldKey) ?? 1) + 1,
+        (this._fieldRegistrationCounts.get(fieldKey) ?? 0) + 1,
       )
       return existing
     }
@@ -179,10 +185,21 @@ export class Form<FieldValues extends Record<string, any>> {
     return field
   }
 
-  unregisterField<const P extends Path<FieldValues>>(name: P): void {
+  unregisterField<const P extends Path<FieldValues>>(
+    name: P,
+    expectedField?: FieldManager<any>,
+  ): void {
     const fieldKey = String(name)
     const field = this._fields.get(fieldKey)
     if (!field) return
+
+    // When `expectedField` is provided, skip unregistration if the field
+    // currently at this path isn't the one the caller registered. This
+    // happens during useFieldArray reindexing: one consumer's useEffect
+    // cleanup fires with a stale `name` closure, but a different
+    // FieldManager (moved here by rename) is now at that path. Destroying
+    // it would delete state that belongs to another consumer.
+    if (expectedField && field !== expectedField) return
 
     const registrations = this._fieldRegistrationCounts.get(fieldKey) ?? 0
     if (registrations > 1) {
@@ -488,6 +505,11 @@ export class Form<FieldValues extends Record<string, any>> {
     if (this._batchDepth > 0) {
       const skipOnChange = opts.skipOnChange ?? false
       if (this._pendingFormStateUpdate) {
+        // Once any batched update asks to skip onChange, the whole batch
+        // skips. Callers that batch multiple changes (setInitialValues,
+        // reset) want the structural-change semantics to dominate over
+        // field-subscription callbacks that fire with skipOnChange=false
+        // as a side-effect of the batched state mutations.
         this._pendingFormStateUpdate.skipOnChange =
           this._pendingFormStateUpdate.skipOnChange || skipOnChange
       }
@@ -514,6 +536,104 @@ export class Form<FieldValues extends Record<string, any>> {
         this._updateFormState({ skipOnChange: pending.skipOnChange })
       }
     }
+  }
+
+  /**
+   * Rewrite every field whose path starts with `<basePath>.<N>` according
+   * to the given `mapping`, atomically. Used by `useFieldArray` so that
+   * sub-fields registered at `items.<N>.<rest>` survive list mutations —
+   * state, error, touched, and form-level subscriptions all carry over;
+   * only the Map key and `.name` property change.
+   *
+   * `mapping` keys are the *current* indexes. Values:
+   *   - a number → new index for that row's sub-fields
+   *   - `null`   → destroy every sub-field under that row (the row is gone)
+   *
+   * Indexes absent from the mapping are left alone.
+   *
+   * Execution is three-phase so that swap/move operations (where old and
+   * new paths collide in both directions) don't temporarily clobber each
+   * other: collect the moves → purge old map entries → write new ones.
+   */
+  _reindexArrayFields(basePath: string, mapping: Map<number, number | null>): void {
+    const basePrefix = `${basePath}.`
+    const renames: Array<{ oldPath: string; newPath: string; field: FieldManager<any> }> = []
+    const destroys: string[] = []
+
+    this._fields.forEach((field, path) => {
+      if (!path.startsWith(basePrefix)) return
+      const rest = path.slice(basePrefix.length)
+      const match = rest.match(/^(\d+)(\..*)?$/)
+      if (!match) return
+
+      const oldIdx = parseInt(match[1] as string, 10)
+      const suffix = match[2] ?? ''
+      if (!mapping.has(oldIdx)) return
+
+      const target = mapping.get(oldIdx)
+      if (target === null) {
+        destroys.push(path)
+        return
+      }
+      const newPath = `${basePath}.${target}${suffix}`
+      if (newPath === path) return
+      renames.push({ oldPath: path, newPath, field })
+    })
+
+    // Destroy rows that were removed. Matches the unregisterField path but
+    // bypasses the per-registration-count decrement — the field is gone
+    // regardless of how many hooks still hold a reference, and their
+    // cleanup effects will noop when they fire.
+    destroys.forEach((path) => {
+      const field = this._fields.get(path)
+      if (!field) return
+      this._fieldUnsubscribers.get(path)?.()
+      this._fieldUnsubscribers.delete(path)
+      this._fieldRegistrationCounts.delete(path)
+      this._fields.delete(path)
+      field.destroy()
+      this._events.emit(eventNames.fieldUnregistered, path)
+    })
+
+    if (renames.length === 0) {
+      if (destroys.length > 0) {
+        this._requestFormStateUpdate({ skipOnChange: true })
+      }
+      return
+    }
+
+    // Phase 1: capture side-tables for every path being renamed, then
+    // wipe their old entries. Registration count is intentionally NOT
+    // preserved — consumer useEffects will re-fire with the new path
+    // and registerField will bump the count back to 1 via the `?? 0`
+    // default above.
+    const movedUnsubs = new Map<string, () => void>()
+    renames.forEach(({ oldPath }) => {
+      const unsub = this._fieldUnsubscribers.get(oldPath)
+      if (unsub) movedUnsubs.set(oldPath, unsub)
+      this._fieldUnsubscribers.delete(oldPath)
+      this._fieldRegistrationCounts.delete(oldPath)
+      this._fields.delete(oldPath)
+    })
+
+    // Phase 2: write new entries. Rename the FieldManager so it reports
+    // the correct name to label/error components and event consumers.
+    renames.forEach(({ oldPath, newPath, field }) => {
+      field._rename(newPath)
+      this._fields.set(newPath, field)
+      const unsub = movedUnsubs.get(oldPath)
+      if (unsub) this._fieldUnsubscribers.set(newPath, unsub)
+    })
+
+    // Phase 3: announce. `field renamed` lets external subscribers
+    // (devtools, custom logging, etc.) follow the move without
+    // pretending it was an unregister + register cycle — nothing in
+    // the field's internal state actually changed.
+    renames.forEach(({ oldPath, newPath }) => {
+      this._events.emit(eventNames.fieldRenamed, oldPath, newPath)
+    })
+
+    this._requestFormStateUpdate({ skipOnChange: true })
   }
 
   private _getFieldsForValidators(): Record<string, ReadonlyField<unknown>> {

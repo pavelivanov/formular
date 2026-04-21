@@ -1,5 +1,52 @@
 # Changelog
 
+## 4.0.0-alpha.6 — unreleased
+
+### Added
+
+- **Per-row field reindexing in `useFieldArray`.** When a component has
+  registered sub-fields under `items.<N>.<rest>` and the user calls
+  `remove/insert/swap/move/prepend`, the sub-fields' state (value, error,
+  touched, subscriptions) is preserved and the paths are atomically
+  renamed. `replace` and `clear` destroy all sub-fields at the array
+  path; new rows register fresh. Closes the last RHF-parity gap in the
+  field-array story.
+- `Form.on('field renamed', (oldPath, newPath) => …)` event for observers
+  (devtools, logging). Fires once per sub-field moved during an array
+  reindex.
+- `Form._reindexArrayFields(basePath, mapping)` — internal primitive
+  powering the above. Atomic three-phase swap: collect → purge old
+  entries → write new entries. Handles swap-style collisions correctly.
+
+### Fixed
+
+- **`setByPath` mutated caller-owned arrays and objects.** When
+  `Form.getValues()` built the aggregated state, writing
+  `out.rows[2] = {}` for a newly-renamed sub-field would **expand the
+  live `rows` field's internal array to 3 items**, poisoning subsequent
+  `setValue` calls (the next `[item, ...prev]` would see the corrupted
+  array). `setByPath` now shallow-copies each container it descends
+  into, so writes to `out` never leak back into the source fields.
+  Covered by the `useFieldArray reindexing` tests and a new
+  `paths.spec.ts` case.
+- **`unregisterField` identity check.** Previously, a component's
+  `useEffect` cleanup with a stale `name` closure would call
+  `unregisterField(oldName)` and destroy whatever field happened to be
+  at that path — including a *different* FieldManager moved there by
+  concurrent array reindex. `unregisterField` now accepts an optional
+  `expectedField` argument; if the field at that path isn't the one the
+  caller holds, the destroy is skipped. `useFieldRegister` passes its
+  own field reference on cleanup.
+- `Form.registerField` existing-count default changed from `?? 1` to
+  `?? 0` so re-registration immediately after a rename (count cleared)
+  bumps correctly from 0 → 1, not 1 → 2.
+
+### Changed
+
+- `FieldManager.name` is no longer `readonly` at the type level. Use
+  `FieldManager._rename(newName)` (internal, called by `Form` during
+  reindex) rather than direct assignment from consumer code.
+
 ## 4.0.0-alpha.5 — unreleased
 
 ### Added

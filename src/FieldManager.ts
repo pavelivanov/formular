@@ -15,7 +15,9 @@ import type {
 type AllFieldsProvider = () => Record<string, ReadonlyField<unknown>>
 
 export class FieldManager<T = unknown> implements IFieldManager<T> {
-  public readonly name: string
+  // Name is read-only to external callers but writable via _rename() so the
+  // Form can reindex array sub-fields after useFieldArray mutations.
+  public name: string
 
   private _state: FieldState<T>
   private _options: FieldOptions<T>
@@ -62,6 +64,17 @@ export class FieldManager<T = unknown> implements IFieldManager<T> {
 
   _attachFieldsProvider(provider: AllFieldsProvider): void {
     this._allFieldsProvider = provider
+  }
+
+  /**
+   * Update the field's name. Internal — called by Form during array
+   * reindexing (e.g. useFieldArray removes an item and all subsequent
+   * rows shift down by one). External state is preserved; subscribers
+   * are not re-notified by the rename itself because no FieldState
+   * changed.
+   */
+  _rename(newName: string): void {
+    this.name = newName
   }
 
   updateOptions(next: FieldOptions<T>): void {

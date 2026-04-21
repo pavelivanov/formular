@@ -57,8 +57,19 @@ export type ArrayPath<T> = {
 }[Path<T>]
 
 /**
- * Walks `obj` by a dotted path, creating intermediate objects as needed,
+ * Walks `obj` by a dotted path, creating intermediate containers as needed,
  * and sets the leaf value. Mutates `obj`.
+ *
+ * When descending into an existing array or object, replaces it with a
+ * shallow copy first. This matters because the caller (Form.getValues)
+ * feeds whole-array field values into `obj` as-is; without the copy-on-
+ * descend step, subsequent calls would mutate those live values (e.g.
+ * assigning `out.rows[2] = {}` to a 2-item field array would expand the
+ * field's internal state to 3 items).
+ *
+ * Numeric-looking path segments get materialised as arrays so
+ * `setByPath({}, 'rows.0.name', 'x')` produces `{ rows: [{ name: 'x' }] }`
+ * rather than `{ rows: { '0': { name: 'x' } } }`.
  */
 export function setByPath(obj: Record<string, any>, path: string, value: unknown): void {
   const parts = path.split('.')
@@ -68,7 +79,11 @@ export function setByPath(obj: Record<string, any>, path: string, value: unknown
     const part = parts[i] as string
     const next = cursor[part]
     if (next === null || typeof next !== 'object') {
-      cursor[part] = {}
+      const nextPart = parts[i + 1] as string
+      cursor[part] = /^\d+$/.test(nextPart) ? [] : {}
+    }
+    else {
+      cursor[part] = Array.isArray(next) ? [ ...next ] : { ...next }
     }
     cursor = cursor[part]
   }

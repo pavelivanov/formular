@@ -1,7 +1,10 @@
 import { useCallback, useMemo, useRef } from 'react'
 
-import { useFieldRegister } from './hooks'
+import type { Form } from './Form'
+import { useFieldRegister, useForm } from './hooks'
 import type { FieldOptions } from './types'
+
+type AnyForm = Form<Record<string, any>>
 
 export interface FieldArrayItem<Item> {
   /**
@@ -64,6 +67,7 @@ export function useFieldArray(
   path: string,
   options: FieldOptions<any[]> = {},
 ): UseFieldArrayReturn<any> {
+  const form = useForm() as AnyForm
   const field = useFieldRegister<any[]>(path, {
     defaultValue: [],
     ...options,
@@ -85,8 +89,21 @@ export function useFieldArray(
     [ items, ids ],
   )
 
+  // Keep a current-items ref so callbacks can compute the right index-
+  // shift mapping for reindexing without closing over stale array data.
+  const itemsRef = useRef(items)
+  itemsRef.current = items
+
+  const reindex = useCallback(
+    (mapping: Map<number, number | null>) => {
+      form._reindexArrayFields(path, mapping)
+    },
+    [ form, path ],
+  )
+
   const append = useCallback(
     (item: any) => {
+      // No reindex needed — the new index has no sub-fields registered yet.
       idsRef.current = [ ...idsRef.current, nextId() ]
       field.setValue((prev) => [ ...(Array.isArray(prev) ? prev : []), item ])
     },
@@ -95,14 +112,24 @@ export function useFieldArray(
 
   const prepend = useCallback(
     (item: any) => {
+      const len = itemsRef.current.length
+      const mapping = new Map<number, number | null>()
+      for (let i = 0; i < len; i++) mapping.set(i, i + 1)
+      reindex(mapping)
+
       idsRef.current = [ nextId(), ...idsRef.current ]
       field.setValue((prev) => [ item, ...(Array.isArray(prev) ? prev : []) ])
     },
-    [ field ],
+    [ field, reindex ],
   )
 
   const insert = useCallback(
     (index: number, item: any) => {
+      const len = itemsRef.current.length
+      const mapping = new Map<number, number | null>()
+      for (let i = index; i < len; i++) mapping.set(i, i + 1)
+      reindex(mapping)
+
       const next = [ ...idsRef.current ]
       next.splice(index, 0, nextId())
       idsRef.current = next
@@ -112,11 +139,17 @@ export function useFieldArray(
         return arr
       })
     },
-    [ field ],
+    [ field, reindex ],
   )
 
   const remove = useCallback(
     (index: number) => {
+      const len = itemsRef.current.length
+      const mapping = new Map<number, number | null>()
+      mapping.set(index, null) // destroy sub-fields at the removed row
+      for (let i = index + 1; i < len; i++) mapping.set(i, i - 1)
+      reindex(mapping)
+
       const next = [ ...idsRef.current ]
       next.splice(index, 1)
       idsRef.current = next
@@ -126,12 +159,17 @@ export function useFieldArray(
         return arr
       })
     },
-    [ field ],
+    [ field, reindex ],
   )
 
   const swap = useCallback(
     (a: number, b: number) => {
       if (a === b) return
+      const mapping = new Map<number, number | null>()
+      mapping.set(a, b)
+      mapping.set(b, a)
+      reindex(mapping)
+
       const nextIds = [ ...idsRef.current ]
       ;[ nextIds[a], nextIds[b] ] = [ nextIds[b] as string, nextIds[a] as string ]
       idsRef.current = nextIds
@@ -142,12 +180,22 @@ export function useFieldArray(
         return arr
       })
     },
-    [ field ],
+    [ field, reindex ],
   )
 
   const move = useCallback(
     (from: number, to: number) => {
       if (from === to) return
+      const mapping = new Map<number, number | null>()
+      mapping.set(from, to)
+      if (from < to) {
+        for (let i = from + 1; i <= to; i++) mapping.set(i, i - 1)
+      }
+      else {
+        for (let i = to; i < from; i++) mapping.set(i, i + 1)
+      }
+      reindex(mapping)
+
       const nextIds = [ ...idsRef.current ]
       const [ movedId ] = nextIds.splice(from, 1)
       if (movedId !== undefined) nextIds.splice(to, 0, movedId)
@@ -160,21 +208,31 @@ export function useFieldArray(
         return arr
       })
     },
-    [ field ],
+    [ field, reindex ],
   )
 
   const replace = useCallback(
     (nextItems: ReadonlyArray<any>) => {
+      const len = itemsRef.current.length
+      const mapping = new Map<number, number | null>()
+      for (let i = 0; i < len; i++) mapping.set(i, null)
+      reindex(mapping)
+
       idsRef.current = nextItems.map(() => nextId())
       field.setValue([ ...nextItems ])
     },
-    [ field ],
+    [ field, reindex ],
   )
 
   const clear = useCallback(() => {
+    const len = itemsRef.current.length
+    const mapping = new Map<number, number | null>()
+    for (let i = 0; i < len; i++) mapping.set(i, null)
+    reindex(mapping)
+
     idsRef.current = []
     field.setValue([])
-  }, [ field ])
+  }, [ field, reindex ])
 
   return { fields, append, prepend, insert, remove, swap, move, replace, clear }
 }
