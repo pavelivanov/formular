@@ -124,14 +124,42 @@ export function ContactFormPage() {
 - **`useFormValidation()`** — returns stable `{ validate, submit, reset }`
   callbacks bound to the form.
 
-### Validators
+### Validation
 
-All validators return `null` on success and a message on failure. Compose
-them with `compose(...)` or pass them as the `validators: [...]` field
-option.
+Fields support three, complementary validation sources, run in this order:
+
+1. **`required: true`** — empties fail with `"This field is required"`.
+2. **`schema`** — any [Standard Schema v1](https://standardschema.dev)
+   implementation (Zod 3.24+, Valibot 0.40+, ArkType, …). First issue
+   message becomes the error.
+3. **`validators`** — array of functions returning `string | null` or
+   `Promise<string | null>`. First non-null wins.
+
+Each stage short-circuits on the first error.
+
+#### Standard Schema
 
 ```ts
-import { compose, email, minLength } from 'formular'
+import { z } from 'zod'
+import { useFieldRegister } from 'formular'
+
+const field = useFieldRegister<ContactForm>('email', {
+  schema: z.string().email('Invalid email'),
+  required: true,
+})
+```
+
+Sync and async schemas are both supported. Value transformations from the
+schema (e.g. Zod's `.transform()`) are **not** applied to the field value;
+if you need the parsed value, parse it yourself in `onSubmit`.
+
+#### Built-in function validators
+
+All return `null` on success and a message on failure. Compose with
+`compose(...)` or pass as the `validators: [...]` field option.
+
+```ts
+import { compose, email, minLength, useFieldRegister } from 'formular'
 
 const field = useFieldRegister<ContactForm>('email', {
   validators: [ compose(email(), minLength(5)) ],
@@ -148,6 +176,10 @@ Built-ins:
 - **Async:** `asyncValidator(fn)` — wraps an async function; thrown errors
   become error strings. Does **not** debounce — use the field's
   `validationDelay` option for that.
+
+If you're starting a new project today, **prefer `schema`** over the
+built-ins — it scales to the whole ecosystem (Zod/Valibot/ArkType) and
+gives you composition, transforms, and inference for free.
 
 ### `FieldOptions`
 

@@ -1,5 +1,33 @@
 # Changelog
 
+## 4.0.0-alpha.2 — unreleased
+
+### Added
+
+- **Standard Schema v1 adapter.** `FieldOptions.schema` accepts any schema
+  library that implements [Standard Schema](https://standardschema.dev)
+  (Zod 3.24+, Valibot 0.40+, ArkType, …) with zero glue code. The schema
+  runs before `validators` in the pipeline; the first issue message becomes
+  the field error. No runtime dependency on the spec — the interface is
+  inlined and re-exported as `StandardSchemaV1` for consumers.
+
+  ```ts
+  import { z } from 'zod'
+  const email = useFieldRegister<ContactForm>('email', {
+    schema: z.string().email(),
+  })
+  ```
+
+- **Bundle-size budget.** `size-limit` wired into `npm run size` and CI.
+  Targets: ESM entry < 6 KB brotli, CJS < 6.5 KB, tree-shaken core < 4.5 KB.
+  Regressions fail CI.
+
+### Changed
+
+- Validation pipeline in `FieldManager`: `required` → `schema` → `validators`.
+  Each stage short-circuits on the first error. Previously there was no
+  schema stage.
+
 ## 4.0.0-alpha.1 — unreleased
 
 Complete rewrite. The public API from v3 is **not** preserved. v3.x remains

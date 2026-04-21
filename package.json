@@ -1,6 +1,6 @@
 {
   "name": "formular",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.2",
   "author": {
     "name": "Pavel Ivanov",
     "email": "grammka@gmail.com"
@@ -50,8 +50,27 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "prepublishOnly": "npm run typecheck && npm run lint && npm run build && npm run test"
+    "size": "size-limit",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run build && npm run test && npm run size"
   },
+  "size-limit": [
+    {
+      "name": "ESM entry (everything)",
+      "path": "dist/index.js",
+      "limit": "6 kB"
+    },
+    {
+      "name": "CJS entry (everything)",
+      "path": "dist/index.cjs",
+      "limit": "6.5 kB"
+    },
+    {
+      "name": "Tree-shaken core (Form + Provider + hooks)",
+      "path": "dist/index.js",
+      "import": "{ Form, useFieldRegister, useFormState, FormContextProvider }",
+      "limit": "4.5 kB"
+    }
+  ],
   "peerDependencies": {
     "react": ">=18.0.0"
   },
@@ -70,6 +89,8 @@
     "prettier": "^3.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "size-limit": "^11.2.0",
+    "@size-limit/preset-small-lib": "^11.2.0",
     "tsdown": "^0.21.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"

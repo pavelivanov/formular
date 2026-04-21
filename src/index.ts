@@ -51,3 +51,8 @@ export type {
   ReadonlyField,
   Validator,
 } from './types'
+export type {
+  StandardSchemaV1,
+  StandardSchemaV1Issue,
+  StandardSchemaV1Result,
+} from './standard-schema'

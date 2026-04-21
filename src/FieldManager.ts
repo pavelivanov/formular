@@ -2,6 +2,7 @@ import equal from 'fast-deep-equal'
 
 import type { DebouncedFunction } from './util/throttle-debounce'
 import { debounce } from './util/throttle-debounce'
+import { runStandardSchema } from './standard-schema'
 
 import type {
   FieldOptions,
@@ -142,6 +143,7 @@ export class FieldManager<T = unknown> implements IFieldManager<T> {
     const seq = ++this._validationSeq
     const isCurrent = () => seq === this._validationSeq
 
+    const schema = this._options.schema
     const validators: Validator<T>[] = this._options.validators || []
     const emptyCheckFn = this._options.emptyCheckFn || this._isEmpty
     const allFields = this._allFieldsProvider?.() ?? {}
@@ -159,7 +161,8 @@ export class FieldManager<T = unknown> implements IFieldManager<T> {
       return error
     }
 
-    if (validators.length === 0) {
+    const hasWork = Boolean(schema) || validators.length > 0
+    if (!hasWork) {
       if (isCurrent()) {
         this._updateState({
           error: null,
@@ -176,6 +179,22 @@ export class FieldManager<T = unknown> implements IFieldManager<T> {
     }
 
     try {
+      if (schema) {
+        const schemaError = await runStandardSchema(schema, this._state.value)
+        if (!isCurrent()) {
+          return schemaError
+        }
+        if (schemaError) {
+          this._updateState({
+            error: schemaError,
+            isValid: false,
+            isValidating: false,
+            isValidated: true,
+          })
+          return schemaError
+        }
+      }
+
       for (const validator of validators) {
         const result = await validator(this._state.value, allFields)
         if (!isCurrent()) {
