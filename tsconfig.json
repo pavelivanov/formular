@@ -3,24 +3,22 @@
     "target": "ES2019",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": [ "ES2020", "DOM" ],
-    "outDir": "lib",
-    "jsx": "react",
+    "lib": [ "ES2020", "DOM", "DOM.Iterable" ],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "strict": true,
+    "noUncheckedIndexedAccess": false,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "resolveJsonModule": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "lib"
-  ]
+  "include": [ "src" ],
+  "exclude": [ "node_modules", "dist", "lib", "examples" ]
 }

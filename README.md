@@ -1,327 +1,212 @@
-# Formular
+# formular
 
-Easy way to work with forms in React. Using React Hooks 😏
+> Small, type-safe form library for React. Form state lives in a pure JS
+> class graph wired together by an event emitter; React components subscribe
+> via hooks and opt in to re-renders only for the slice they care about.
 
-<p>❤️ Just 3kb gzip</p>
-<p>❤️ React hooks</p>
-<p>❤️ TypeScript</p>
-<p>❤️ Changes made within form rerender only changed fields</p>
+[![npm](https://img.shields.io/npm/v/formular.svg)](https://www.npmjs.com/package/formular)
 
+**v4 is a complete rewrite** and is currently shipping as an alpha. The
+stable v3.x line remains published on npm. See [CHANGELOG.md](./CHANGELOG.md)
+for the full migration guide.
 
-#### Installation
+## Why
 
+Most form libraries store form state in React state. That couples every
+keystroke to the render tree and makes large forms easy to thrash.
+
+`formular` keeps form state outside of React:
+
+- `Form<FieldValues>` and `FieldManager<T>` are plain classes with their own
+  state machines.
+- Mutations emit events; components that want to react subscribe through
+  hooks backed by `useSyncExternalStore`.
+- No React state means no render cascade on every field update, and no
+  provider re-creation churn when `initialValues` load asynchronously.
+
+Current bundle: **~6.8 KB gzip (ESM)**, including 15 built-in validators.
+
+## Install
+
+```bash
+npm install formular@next
+# or
+npm install formular@4.0.0-alpha.1
 ```
-npm install formular
-```
 
+Peer: `react >=18`.
 
-## Philosophy
-
-There are many form libraries that works out of the box - _"import Form, Field and that's it"_. But in most projects common fields are customized by design and usage of Form, Field components become impossible. **Formular** doesn't provide inboxing components for fast start, but it provides easy way to attach form functionality to custimized fields!
-
-For example you have your own styled `Input` component with specific logic inside
+## Basic usage
 
 ```tsx
-import { useField, useFieldState } from 'formular'
+import {
+  FormContextProvider,
+  FieldError,
+  FieldLabel,
+  useFieldRegister,
+  useFormContext,
+  useFormState,
+} from 'formular'
 
-const FormularInput = () => {
-  const field = useField()
-  const state = useFieldState(field)
-
-  return <CustomInput value={state.value} onChange={field.set} />
+type ContactForm = {
+  name: string
+  email: string
 }
-```
 
-`useField` is a wrapper for `new Field`:
-
-```tsx
-const useField = (opts, deps) => useMemo(() => new Field(opts), deps || [])
-```
-
-So when field's state updates FormularSelect doesn't render. Here `useFieldState` comes, it triggers react state update which call component's render.
-
-#### This is Field, and whats about Form?
-
-Lets update the code above to reuse Select component
-
-```tsx
-import { useField, useFieldState } from 'formular'
-
-const FormularInput = ({ field }) => {
-  const state = useFieldState(field)
-
-  return <CustomInput value={state.value} onChange={field.set} />
-}
-
-const Auth = () => {
-  const emailField = useField()
-  const passwordField = useField()
+function NameField() {
+  const field = useFieldRegister<ContactForm>('name', { required: true })
 
   return (
-    <>
-      <FormularInput field={emailField} />
-      <FormularInput field={passwordField} />
-    </>
+    <div>
+      <FieldLabel field={field}>Name</FieldLabel>
+      <input
+        value={field.state.value}
+        onChange={(e) => field.setValue(e.target.value)}
+        aria-invalid={!!field.state.error}
+      />
+      <FieldError field={field} />
+    </div>
+  )
+}
+
+function SubmitButton() {
+  const form = useFormContext<ContactForm>()
+  const { isSubmitting, isValid } = useFormState()
+
+  return (
+    <button
+      disabled={isSubmitting || !isValid}
+      onClick={form.handleSubmit((values) => console.log('submit', values))}
+    >
+      Submit
+    </button>
+  )
+}
+
+export function ContactFormPage() {
+  return (
+    <FormContextProvider<ContactForm> initialValues={{ name: '', email: '' }}>
+      <NameField />
+      <SubmitButton />
+    </FormContextProvider>
   )
 }
 ```
 
-Let's add validators and submit logic
+## API
 
+### Components
 
-```tsx
+- **`FormContextProvider<FieldValues>`** — creates a `Form` instance and puts
+  it on context. Props: `initialValues`, `onSubmit`, `onSubmitError`,
+  `onChange`, `formId`, `children`. If `initialValues` changes after mount it
+  re-seeds the form (edited fields keep their current value; untouched fields
+  update; unmounted fields pick up the new seed on registration).
+- **`FieldLabel`** — label bound to a field; renders a `*` when the field
+  is required. Defaults `htmlFor` to `field.name` unless `id` is provided.
+  Headless — pass your own `className`s.
+- **`FieldError`** — renders the field's current error message as an
+  `aria-live="polite"` region (or nothing when no error).
 
-const required = (value) => {
-  if (!value) {
-    return 'Required'
-  }
-}
+### Hooks
 
-const Auth = () => {
-  const emailField = useField({
-    validate: [ required ],
-  })
-  const passwordField = useField({
-    validate: [ required ],
-  })
+- **`useForm<FieldValues>()`** — returns the ambient `Form` instance.
+- **`useFormContext<FieldValues>()`** — alias of `useForm`; throws if used
+  outside a provider.
+- **`useFormState()`** — subscribes to form state changes. Only components
+  that call this re-render on form state changes.
+- **`useFieldRegister<FieldValues>(name, options?)`** — registers a field
+  (or returns the existing one) and subscribes the component to it. The typed
+  overload constrains `name` to `keyof FieldValues` and returns
+  `FieldManager<FieldValues[K]>`.
+- **`useField<T>(name)`** — read-only subscription to a field that some
+  other component registered. Returns `undefined` until it registers.
+- **`useFormValidation()`** — returns stable `{ validate, submit, reset }`
+  callbacks bound to the form.
 
-  const handleSubmit = useCallback(async () => {
-    const isEmailValid = await emailField.validate()
-    const isPasswordValid = await passwordField.validate()
-    
-    const emailValue = emailField.state.value
-    const passwordValue = passwordField.state.value
-    
-    const emailError = emailField.state.error
-    const passwordError = passwordField.state.error
-  }, [])
+### Validators
 
-  return (
-    <>
-      <FormularInput field={emailField} />
-      <FormularInput field={passwordField} />
-      <button onClick={handleSubmit}>Login</button>
-    </>
-  )
-}
-```
+All validators return `null` on success and a message on failure. Compose
+them with `compose(...)` or pass them as the `validators: [...]` field
+option.
 
-Same could be written using `useForm`
+```ts
+import { compose, email, minLength } from 'formular'
 
-```tsx
-const Auth = () => {
-  const form = useForm({
-    fields: {
-      email: [ required ],
-      password: [ required ],
-    },
-  })
-
-  const handleSubmit = useCallback(async () => {
-    const isValid = await form.validate()
-    
-    const values = form.getValues() // { email: '', password: '' }
-    const errors = form.getErrors() // { email: 'Required', password: 'Required' }
-  }, [])
-
-  return (
-    <>
-      <FormularInput field={emailField} />
-      <FormularInput field={passwordField} />
-      <button onClick={handleSubmit}>Login</button>
-    </>
-  )
-}
-```
-
-in most cases you need submit
-
-```tsx
-const handleSubmit = useCallback(async () => {
-  try {
-    const values = await form.submit() // { email: '', password: '' }
-  }
-  catch (errors) {} // { email: 'Required', password: 'Required' }
-}, [])
-```
-
-
-### Validation
-
-```
-const required = (value) => {
-  if (!value) {
-    return 'Required'
-  }
-}
-
-const uniqueEmail = async (value) => {
-  const isExist = await fetch(`check-email-exist?email={value}`)
-  
-  if (isExists) {
-    return 'Account with such email already exists'
-  }
-}
-
-const field = useField({
-  validate: [ required, uniqueEmail ]
+const field = useFieldRegister<ContactForm>('email', {
+  validators: [ compose(email(), minLength(5)) ],
+  required: true,
 })
-
-const isValid = await field.validate()
 ```
 
-☝️ `field.validate()` always async!<br />
-☝️ a validator function should return `undefined` if value is valid
+Built-ins:
 
+- **String/number:** `minLength`, `maxLength`, `pattern`, `email`, `url`,
+  `phoneNumber`, `numeric`, `min`, `max`, `creditCard`.
+- **Date:** `dateFormat`, `minAge`.
+- **Cross-field:** `confirmField(otherName, message?)`.
+- **Async:** `asyncValidator(fn)` — wraps an async function; thrown errors
+  become error strings. Does **not** debounce — use the field's
+  `validationDelay` option for that.
 
-
-## Examples
-
-- [Basics](https://codesandbox.io/s/formular-basics-cke7r)
-- [Building own Input](https://codesandbox.io/s/formular-building-own-input-4qsxd)
-- [Async validation](https://codesandbox.io/s/formular-async-validation-i6l4c)
-
-
-## Options
-
-#### Form
+### `FieldOptions`
 
 ```ts
-type FormOpts = {
-  name?: string
-  fields: {
-    [key: string]: FieldOpts
-  }
-  initialValues?: object
-}
-```
-
-#### Field
-
-```ts
-type FieldOpts = {
-  name?: string
-  value?: string                // initial value
-  validate?: Array<Function>    // list of validators
+type FieldOptions<T> = {
+  defaultValue?: T
+  validators?: Validator<T>[]
+  /** Milliseconds to debounce in-flight validation after setValue. */
+  validationDelay?: number
+  required?: boolean
   readOnly?: boolean
-  validationDelay?: number      // adds debounce to validation
+  /** Override the default "value is empty" check used by `required`. */
+  emptyCheckFn?: (value: T) => boolean
 }
 ```
 
+### Events
 
-## Interfaces
+`Form` emits:
 
-#### Form
+| Name                  | Payload                       | When                                        |
+|-----------------------|-------------------------------|---------------------------------------------|
+| `state change`        | `FormState`                   | Any tracked form-level state change         |
+| `change`              | `values`                      | Any field value actually changed            |
+| `field registered`    | `name, FieldManager`          | A new field registered                      |
+| `field unregistered`  | `name`                        | A field unregistered                        |
+| `submit`              | `{ values, errors }`          | Submit completed (valid or invalid)         |
+| `submit error`        | `error, { values, errors, isValid, phase }` | Submit/onSuccess threw        |
 
-```ts
-type FormEntity = {
-  name?: string
-  opts: FormOpts
-  fields: {
-    [key: string]: Field
-  }
-  state: {
-    isValid: boolean
-    isChanged: boolean
-    isValidating: boolean
-    isSubmitting: boolean
-    isSubmitted: boolean
-  }
-  setState(values: Partial<State>): void
-  setValues(values: object): void
-  getValues(): object
-  unsetValues(): void
-  getErrors(): object
-  async validate(): Promise<boolean>
-  async submit(): Promise<object>
-  on(eventName: string, handler: Function): void
-  off(eventName: string, handler: Function): void
-}
+Hook helpers (`useFormState`, `useField`, `useFieldRegister`) wire the right
+subscriptions for you — reach for raw `form.on` only for side effects
+outside the render tree.
 
-const form: FormEntity = useForm(opts)
-```
+## Dynamic & conditional fields
 
-#### Field
+Fields register when their component mounts and unregister on unmount.
+Unmounting a field destroys its state. If you need persistence across
+visibility, keep the field mounted (`display: none`) or hoist the value up
+via `setValues`.
 
-```ts
-type FieldEntity = {
-  form?: Form
-  name?: string
-  opts: FieldOpts
-  node?: HTMLElement
-  validators: Array<Function>
-  readOnly: boolean
-  debounceValidate: Function  // method to call validation with debounce
-  state: {
-    value: any
-    error: any
-    isChanged: boolean
-    isValidating: boolean
-    isValidated: boolean
-    isValid: boolean
-  }
-  setState(values: Partial<State>): void
-  setRef(node: HTMLElement): void
-  unsetRef(): void
-  set(value: any, opts?: { silent: boolean }): void
-  unset(): void
-  validate = (): CancelablePromise
-  on(eventName: string, handler: Function): void
-  off(eventName: string, handler: Function): void
-}
+## Hydrating from async data
 
-const field: FieldEntity = useField(opts)
-```
+Two patterns work:
 
-**Note:** `{ silent: true }` in field.set doesn't trigger events.
+1. **Gate the provider on data** — render `FormContextProvider` only once
+   server data is ready.
+2. **Hydrate lazily** — render the provider immediately, then call
+   `form.setValues(data)` or re-seed via changing `initialValues`.
+   `setValues` buffers keys for fields that haven't mounted yet, so ordering
+   between data arrival and field registration doesn't matter.
 
+## v3 → v4
 
-## Events
+v4 is a ground-up rewrite. The API from v3 is not preserved. See
+[CHANGELOG.md](./CHANGELOG.md) for the mapping.
 
-#### Form
+If you're on v3 and don't want to migrate, the v3.x line will continue to
+receive security and correctness fixes.
 
-```ts
-form.on('state change', (state) => {
-  // triggers on a form's state change
-})
+## License
 
-form.on('change', (field) => {
-  // triggers on a field change
-})
-
-form.on('blur', (field) => {
-  // triggers on a field blurring
-})
-```
-
-#### Field
-
-```ts
-form.on('state change', (state) => {
-  // triggers on a field's state change
-})
-
-field.on('set', (value) => {
-  // triggers on a value set
-})
-
-field.on('change', (value) => {
-  // simlink to "set"
-})
-
-field.on('unset', () => {
-  // triggers on a value unset
-})
-
-field.on('start validate', () => {
-  // triggers on a validation start
-})
-
-field.on('validate', (error) => {
-  // triggers on a validation finish
-})
-
-field.on('blur', () => {
-  // triggers on a field blurring
-})
-```
+ISC

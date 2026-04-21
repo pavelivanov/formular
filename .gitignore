@@ -3,9 +3,7 @@
 .yarn
 .pnp.js
 
-*-lock.*
-yarn.lock
-
 node_modules
 dist
-lib
+coverage
+*.log
