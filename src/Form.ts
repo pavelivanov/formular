@@ -19,7 +19,7 @@ type FormFieldOpts<T> = {
   [K in keyof T]: FieldOpts<T[K]> | Validator[]
 }
 
-export type FormOpts<T extends {}> = {
+export type FormOpts<T> = {
   name?: string
   fields: FormFieldOpts<T>
   initialValues?: Partial<{
@@ -27,11 +27,11 @@ export type FormOpts<T extends {}> = {
   }>
 }
 
-type FormFields<T extends {}> = {
+type FormFields<T> = {
   [K in keyof T]: Field<T[K]>
 }
 
-export type FormErrors<T extends {}> = {
+export type FormErrors<T> = {
   [K in keyof T]: any
 }
 
@@ -47,7 +47,7 @@ const defaultOptions: any = {
   initialValues: {},
 }
 
-class Form<FieldValues extends {}> {
+class Form<FieldValues> {
 
   private _events: Events<FormEventName>
   name?: string
@@ -174,8 +174,8 @@ class Form<FieldValues extends {}> {
   }
 
   getErrors(): FormErrors<FieldValues> | null {
-    const fieldNames = Object.keys(this.fields) as Array<keyof FieldValues>
-    const errors = {} as FieldValues
+    const fieldNames = Object.keys(this.fields as object) as Array<keyof FieldValues>
+    const errors = {} as FormErrors<FieldValues>
 
     fieldNames.forEach((fieldName) => {
       const error = (this.fields as any)[fieldName].state.error
@@ -185,7 +185,7 @@ class Form<FieldValues extends {}> {
       }
     })
 
-    return Object.keys(errors).length ? errors : null
+    return Object.keys(errors as object).length ? errors : null
   }
 
   async validate(): Promise<boolean> {
@@ -199,21 +199,24 @@ class Form<FieldValues extends {}> {
   }
 
   async submit(): Promise<{ values: FieldValues, errors: FormErrors<FieldValues> | null }> {
-    // validation takes values on start but user may change form values after this moment and before the validation end
-    // so if getValues is called after validate() - values may be different in validation and result of sumbit
-    // so we should get form values before async validation
-    // TODO lock fields on validations start
-    const values = this.getValues()
-    // TODO don't validate if all fields are changed and valid
-    await this.validate()
+    this.setState({ isSubmitting: true })
 
-    const errors = this.getErrors()
+    try {
+      const values = this.getValues()
+      // TODO don't validate if all fields are changed and valid
+      await this.validate()
 
-    this._events.dispatch(eventNames.submit, errors, values)
+      const errors = this.getErrors()
 
-    return {
-      values,
-      errors,
+      this._events.dispatch(eventNames.submit, errors, values)
+
+      return {
+        values,
+        errors,
+      }
+    }
+    finally {
+      this.setState({ isSubmitting: false, isSubmitted: true })
     }
   }
 

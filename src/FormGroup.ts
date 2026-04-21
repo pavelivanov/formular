@@ -27,45 +27,67 @@ type FormInstances<FormsFieldValues> = {
   [K in keyof FormsFieldValues]: Form<FormsFieldValues[K]>
 }
 
-class FormGroup<FormsFieldValues extends {}> {
+class FormGroup<FormsFieldValues> {
 
   private _events: Events<FormGroupEventName | FormEventName>
+  private _formHandlers: Map<Form<any>, Partial<Record<FormEventName, Function>>>
   forms: FormInstances<FormsFieldValues>
 
   constructor(forms?: FormInstances<FormsFieldValues>) {
     this._events = new Events<FormGroupEventName | FormEventName>()
+    this._formHandlers = new Map()
     // @ts-ignore
     this.forms = forms || {}
 
     this._subscribe()
   }
 
-  private _handleFormEvent = (eventName: FormEventName) => debounce(() => {
-    this._events.dispatch(eventName)
-  }, 100)
+  private _subscribeForm(form: Form<any>) {
+    if (this._formHandlers.has(form)) {
+      return
+    }
+
+    const handlers: Partial<Record<FormEventName, Function>> = {}
+    const eventNames = Object.keys(formEventNames) as FormEventName[]
+
+    eventNames.forEach((eventName) => {
+      const handler = debounce(() => {
+        this._events.dispatch(eventName)
+      }, 100)
+
+      handlers[eventName] = handler
+      form.on(eventName, handler)
+    })
+
+    this._formHandlers.set(form, handlers)
+  }
+
+  private _unsubscribeForm(form: Form<any>) {
+    const handlers = this._formHandlers.get(form)
+
+    if (!handlers) {
+      return
+    }
+
+    const eventNames = Object.keys(handlers) as FormEventName[]
+
+    eventNames.forEach((eventName) => {
+      const handler = handlers[eventName]
+      if (handler) {
+        form.off(eventName, handler)
+      }
+    })
+
+    this._formHandlers.delete(form)
+  }
 
   private _subscribe() {
     const forms = Object.values(this.forms) as Array<Form<any>>
-
-    forms.forEach((form) => {
-      const eventNames = Object.keys(formEventNames) as FormEventName[]
-
-      eventNames.forEach((eventName) => {
-        form.on(eventName, this._handleFormEvent(eventName))
-      })
-    })
+    forms.forEach((form) => this._subscribeForm(form))
   }
 
   private _unsubscribe() {
-    const forms = Object.values(this.forms) as Array<Form<any>>
-
-    forms.forEach((form) => {
-      const eventNames = Object.keys(formEventNames) as FormEventName[]
-
-      eventNames.forEach((eventName) => {
-        form.off(eventName, this._handleFormEvent(eventName))
-      })
-    })
+    Array.from(this._formHandlers.keys()).forEach((form) => this._unsubscribeForm(form))
   }
 
   attachForms(forms: Partial<FormInstances<FormsFieldValues>>): void {
@@ -73,10 +95,12 @@ class FormGroup<FormsFieldValues extends {}> {
 
     formNames.forEach((formName) => {
       if (formName in this.forms) {
-        console.error(`Form with name "${formName}" already exists in FormGroup`)
+        console.error(`Form with name "${String(formName)}" already exists in FormGroup`)
       }
       else {
-        this.forms[formName] = forms[formName] as any
+        const form = forms[formName] as Form<any>
+        this.forms[formName] = form as any
+        this._subscribeForm(form)
       }
     })
 
@@ -85,8 +109,12 @@ class FormGroup<FormsFieldValues extends {}> {
   }
 
   detachForms(formNames: Array<keyof FormsFieldValues>): void {
-    formNames.forEach((fieldName) => {
-      delete this.forms[fieldName]
+    formNames.forEach((formName) => {
+      const form = this.forms[formName] as Form<any> | undefined
+      if (form) {
+        this._unsubscribeForm(form)
+      }
+      delete this.forms[formName]
     })
 
     this._events.dispatch(eventNames.detachForms)
@@ -173,21 +201,26 @@ class FormGroup<FormsFieldValues extends {}> {
   }
 
   async submit(): Promise<{ values: FormsValues<FormsFieldValues>, errors: FormsErrors<FormsFieldValues> | null }> {
-    // validation takes values on start but user may change form values after this moment and before the validation end
-    // so if getValues is called after validate() - values may be different in validation and result of sumbit
-    // so we should get form values before async validation
-    // TODO lock fields on validations start
-    const values = this.getValues()
+    const forms = Object.values(this.forms) as Array<Form<any>>
 
-    await this.validate()
+    forms.forEach((form) => form.setState({ isSubmitting: true }))
 
-    const errors = this.getErrors()
+    try {
+      const values = this.getValues()
 
-    this._events.dispatch(eventNames.submit, errors, values)
+      await this.validate()
 
-    return {
-      values,
-      errors,
+      const errors = this.getErrors()
+
+      this._events.dispatch(eventNames.submit, errors, values)
+
+      return {
+        values,
+        errors,
+      }
+    }
+    finally {
+      forms.forEach((form) => form.setState({ isSubmitting: false, isSubmitted: true }))
     }
   }
 

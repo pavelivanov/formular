@@ -111,6 +111,15 @@ class Field<Value> {
   }
 
   setRef(node: HTMLInputElement): void {
+    if (this.node === node) {
+      return
+    }
+
+    if (this.node) {
+      this.node.removeEventListener(eventNames.focus, this.handleFocus)
+      this.node.removeEventListener(eventNames.blur, this.handleBlur)
+    }
+
     this.node = node
 
     if (this.node) {
@@ -137,6 +146,10 @@ class Field<Value> {
   }
 
   set(value: any, opts?: { silent: boolean }): void {
+    if (this.form && this.form.state.isSubmitting) {
+      return
+    }
+
     const { silent } = opts || {}
 
     const modifiedValue = Field.modifyValue(value)
@@ -219,12 +232,17 @@ class Field<Value> {
       this._cancelablePromise.cancel()
     }
 
-    this._cancelablePromise = new CancelablePromise(async (resolve: Function) => {
-      await asyncSome(this.validators, async (validator: Function) => {
-        error = await validator(this.state.value, this.form && this.form.fields) // error here is String error message
-        return Boolean(error)
-      })
-      resolve()
+    this._cancelablePromise = new CancelablePromise(async (resolve: Function, reject: Function) => {
+      try {
+        await asyncSome(this.validators, async (validator: Function) => {
+          error = await validator(this.state.value, this.form && this.form.fields) // error here is String error message
+          return Boolean(error)
+        })
+        resolve()
+      }
+      catch (err) {
+        reject(err)
+      }
     })
 
     return this._cancelablePromise.then(() => {

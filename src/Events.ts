@@ -26,13 +26,22 @@ class Event {
    * Call all handlers in all priorities of current Event
    */
   call(...eventArgs: Array<any>) {
+    const errors: Array<any> = []
+
     this.handlers.forEach((handler) => {
       try {
         handler(...eventArgs)
       }
       catch (err) {
-        console.error(err)
+        errors.push(err)
       }
+    })
+
+    // Surface handler errors to global error handlers (window.onerror,
+    // process.on('uncaughtException'), test runners, error tracking)
+    // without letting a single bad handler break the dispatch loop.
+    errors.forEach((err) => {
+      setTimeout(() => { throw err }, 0)
     })
   }
 }
