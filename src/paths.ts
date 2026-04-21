@@ -49,6 +49,14 @@ export type DeepPartial<T> = T extends Array<infer U>
     : T
 
 /**
+ * Subset of `Path<T>` whose value is an array (or readonly array). Used to
+ * constrain `useFieldArray` to paths that actually point at a collection.
+ */
+export type ArrayPath<T> = {
+  [P in Path<T>]: PathValue<T, P> extends ReadonlyArray<any> ? P : never
+}[Path<T>]
+
+/**
  * Walks `obj` by a dotted path, creating intermediate objects as needed,
  * and sets the leaf value. Mutates `obj`.
  */

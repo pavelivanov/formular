@@ -11,6 +11,8 @@ export {
   useFormState,
   useFormValidation,
 } from './hooks'
+export { useFieldArray } from './useFieldArray'
+export type { FieldArrayItem, UseFieldArrayReturn } from './useFieldArray'
 
 // Validators
 export {
@@ -56,4 +58,4 @@ export type {
   StandardSchemaV1Issue,
   StandardSchemaV1Result,
 } from './standard-schema'
-export type { DeepPartial, Path, PathValue } from './paths'
+export type { ArrayPath, DeepPartial, Path, PathValue } from './paths'

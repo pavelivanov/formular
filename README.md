@@ -213,6 +213,51 @@ Hook helpers (`useFormState`, `useField`, `useFieldRegister`) wire the right
 subscriptions for you — reach for raw `form.on` only for side effects
 outside the render tree.
 
+## Field arrays
+
+```tsx
+import { useFieldArray } from 'formular'
+
+type Form = {
+  tags: string[]
+}
+
+function Tags() {
+  const { fields, append, remove, move } = useFieldArray<Form>('tags')
+
+  return (
+    <>
+      {fields.map((field) => (
+        <Row key={field.id}>
+          <input
+            value={field.value}
+            onChange={(e) => {
+              // whole-array field; update via replace or per-index setValues
+            }}
+          />
+          <button onClick={() => remove(field.index)}>×</button>
+        </Row>
+      ))}
+      <button onClick={() => append('')}>add tag</button>
+    </>
+  )
+}
+```
+
+Operations: `append`, `prepend`, `insert(i, item)`, `remove(i)`,
+`swap(a, b)`, `move(from, to)`, `replace(items)`, `clear()`.
+
+`fields[i].id` is stable across inserts, swaps, and moves, so drop it
+straight into `key=`. The hook keys on the array path as a single field,
+so `form.setValues({ tags: [...] })` stays the source of truth and
+external mutations still reach the UI.
+
+**Not handled automatically:** sub-field registrations at
+`items.<N>.*` paths. If you register `useFieldRegister<Form>('items.0.name')`
+the hook won't reindex that path when you `remove(0)`. For per-row
+validation today, prefer a schema (Zod `z.array(z.object({...}))`) over
+individual sub-fields.
+
 ## Nested paths
 
 Field names are dotted paths typed against your form shape. You can register

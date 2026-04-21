@@ -1,5 +1,31 @@
 # Changelog
 
+## 4.0.0-alpha.4 — unreleased
+
+### Added
+
+- **`useFieldArray(path)`** hook for managing array-valued fields. Returns
+  `{ fields, append, prepend, insert, remove, swap, move, replace, clear }`.
+  Each `fields[i]` has a stable `id` (survives inserts/swaps/moves) for
+  React keying, plus `index` and `value`. Typed via `ArrayPath<T>` — the
+  hook is only callable at paths whose value is an array.
+- `ArrayPath<T>` exported from the entry.
+
+### Scope note
+
+This hook manages the array value as a single `FieldManager<Item[]>`. It
+does NOT auto-register/reindex sub-fields at `items.<N>.*` paths when
+items are inserted or removed. If you need per-row field state beyond
+schema validation, register those paths yourself — or layer a schema
+(Zod `z.array(...)`) at the form or field level. The RHF-style
+auto-reindex is a future feature.
+
+### Bundle
+
+- ESM entry: 5.37 KB brotli (+440 B for the hook and its 8 operations).
+  Tree-shaken core: 3.95 KB (+20 B, negligible — the hook ships only when
+  imported). All size budgets intact.
+
 ## 4.0.0-alpha.3 — unreleased
 
 ### Added
