@@ -1,22 +1,25 @@
-const isEmpty = value => typeof value === 'undefined' || value === null || value === '' || /^\s+$/.test(value)
+const isEmpty = (value: any): boolean =>
+  typeof value === 'undefined' || value === null || value === '' || /^\s+$/.test(value)
 
 
-export const required = (value) => {
+export const required = (value: any): string | undefined => {
   if (isEmpty(value)) {
     return 'Required'
   }
+  return undefined
 }
 
-export const telephone = (value) => {
+export const telephone = (value: any): string | undefined => {
   if (!isEmpty(value) && !/^\+1\s\d{3}\s\d{3}\s\d{2}\s\d{2}$/.test(value)) {
     return 'Must be a valid phone number'
   }
+  return undefined
 }
 
 // only letters not available
 // only numbers not available
 // available symbols:  \s  A-Z  a-z  0-9  #  /  -
-export const streetAddress = (value) => {
+export const streetAddress = (value: any): string | undefined => {
   if (
     !isEmpty(value)
     && (
@@ -27,4 +30,5 @@ export const streetAddress = (value) => {
   ) {
     return 'Must be a valid street address'
   }
+  return undefined
 }

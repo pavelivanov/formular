@@ -1,18 +1,13 @@
 module.exports = {
-  testRegex: '.*.spec.js$',
-  transform: {
-    '^.+\\.js$': 'babel-jest'
-  },
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  testRegex: '.*\\.spec\\.(ts|tsx|js)$',
   roots: [
-    '<rootDir>/test'
+    '<rootDir>/test',
   ],
   moduleFileExtensions: [
+    'ts',
+    'tsx',
     'js',
   ],
-  moduleDirectories: [
-    'node_modules',
-  ],
-  transformIgnorePatterns: [
-    '<rootDir>/node_modules/',
-  ]
 }

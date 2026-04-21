@@ -25,40 +25,42 @@
     "dist"
   ],
   "license": "ISC",
+  "sideEffects": false,
   "module": "dist/index.es.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "test": "jest --bail --colors",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "format": "prettier --write 'src/**/*.{ts,tsx}' 'test/**/*.{ts,tsx,js}'",
     "build": "rimraf ./dist && rimraf ./lib && rollup -c",
     "watch": "rollup -cw",
-    "prepublish": "npm run build && npm run test"
+    "prepublishOnly": "npm run build && npm run test"
   },
   "peerDependencies": {
     "react": ">=17.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.7",
-    "@babel/core": "^7.7.7",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.7.7",
-    "@babel/plugin-transform-classes": "^7.7.4",
-    "@babel/plugin-transform-destructuring": "^7.7.4",
-    "@babel/plugin-transform-runtime": "^7.7.6",
-    "@babel/preset-env": "^7.7.7",
-    "@babel/preset-react": "^7.7.4",
-    "@babel/preset-typescript": "^7.7.7",
-    "@babel/register": "^7.7.7",
-    "@testing-library/react-hooks": "^3.2.1",
-    "@types/react": "^16.9.22",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-loader": "^8.1.0",
-    "jest": "^24.9.0",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.1.0",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-typescript2": "^0.26.0",
-    "typescript": "^3.8.3"
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.14.0",
+    "ts-jest": "^29.1.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "fast-deep-equal": "^3.1.1"

@@ -7,7 +7,7 @@ type Forms<T> = {
   [K in keyof T]: Form<T[K]>
 }
 
-const useFormGroup = <T extends {}>(forms: Forms<T>, deps?: any[]) => {
+const useFormGroup = <T,>(forms: Forms<T>, deps?: any[]) => {
   const [ _, update ] = useState(0)
   const formGroup = useMemo(() => new FormGroup(forms), deps || [])
 

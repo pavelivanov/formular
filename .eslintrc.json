@@ -1,0 +1,28 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": { "jsx": true }
+  },
+  "plugins": [ "@typescript-eslint", "react" ],
+  "settings": { "react": { "version": "detect" } },
+  "env": { "browser": true, "node": true, "es2020": true, "jest": true },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": [ "warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" } ],
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/ban-types": "warn",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-this-alias": "warn",
+    "react/prop-types": "off",
+    "no-empty": [ "error", { "allowEmptyCatch": true } ]
+  },
+  "ignorePatterns": [ "lib/", "dist/", "node_modules/", "examples/" ]
+}
