@@ -8,16 +8,41 @@ import type { DeepPartial } from './paths'
 
 const FormContext = createContext<Form<any> | null>(null)
 
-export function FormContextProvider<FieldValues extends Record<string, any>>({
+type ProviderProps<FieldValues extends Record<string, any>> = {
+  children: React.ReactNode
+  /**
+   * A caller-controlled `Form` instance to put on context, instead of
+   * letting the Provider create (and destroy) its own. When provided, the
+   * Provider skips its internal lifecycle management — no setOptions,
+   * no setInitialValues re-seed, no destroy on unmount. The caller owns
+   * the form's lifetime.
+   *
+   * Primarily for tests (see `formular/testing`'s `createTestForm`).
+   */
+  form?: Form<FieldValues>
+} & FormOptions<FieldValues>
+
+export function FormContextProvider<FieldValues extends Record<string, any>>(
+  props: ProviderProps<FieldValues>,
+) {
+  if (props.form) {
+    return (
+      <FormContext.Provider value={props.form}>
+        {props.children}
+      </FormContext.Provider>
+    )
+  }
+  return <ManagedProvider {...props} />
+}
+
+function ManagedProvider<FieldValues extends Record<string, any>>({
   children,
   initialValues,
   onSubmit,
   onSubmitError,
   onChange,
   formId,
-}: {
-  children: React.ReactNode
-} & FormOptions<FieldValues>) {
+}: ProviderProps<FieldValues>) {
   const [ form ] = useState(() => {
     return new Form<FieldValues>({
       formId,

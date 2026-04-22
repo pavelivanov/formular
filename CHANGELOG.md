@@ -1,5 +1,31 @@
 # Changelog
 
+## 4.0.0-beta.3 — unreleased
+
+### Added
+
+- **`formular/testing`** subpath export with a `createTestForm<T>(options)`
+  helper. Returns `{ form, Provider }` — a `Form` instance you can read
+  and mutate directly from test code, plus a minimal React wrapper that
+  puts that form on context for rendered components. Renderer-agnostic
+  (works with `@testing-library/react`, Enzyme, bare `react-dom`, etc.).
+- **`FormContextProvider` now accepts an optional `form` prop.** When
+  provided, the Provider puts the caller-controlled instance on context
+  and skips its internal lifecycle (no `setOptions`/`setInitialValues`
+  re-seed/destroy-on-unmount). Additive — existing usage is unchanged.
+  Primarily for tests and advanced users who want to own the form's
+  lifetime.
+
+### Bundle
+
+| Bundle | Limit (brotli) | Actual |
+|---|---|---|
+| ESM entry | 6.5 kB | 5.99 kB (+30 B for the provider split) |
+| CJS entry | 7 kB | 6.25 kB |
+| Tree-shaken core | 5 kB | 4.35 kB |
+| Devtools subpath | 5 kB | 3.12 kB |
+| Testing subpath | 5 kB | **4.21 kB (new)** |
+
 ## 4.0.0-beta.2 — unreleased
 
 ### Added

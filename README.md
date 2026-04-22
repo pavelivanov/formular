@@ -318,6 +318,43 @@ If you register a whole-object field (`useFieldRegister<T>('address')`),
 instead of descending. Mix granular and whole-object fields however suits
 your form.
 
+## Testing
+
+A small helper for reaching into a form during tests, exported from
+the `formular/testing` subpath:
+
+```tsx
+import { render, fireEvent } from '@testing-library/react'
+import { createTestForm } from 'formular/testing'
+import { NameField } from './NameField'
+
+test('typing into NameField updates the form', () => {
+  const { form, Provider } = createTestForm<Contact>({
+    initialValues: { name: '', email: '' },
+  })
+
+  const { getByTestId } = render(
+    <Provider>
+      <NameField />
+    </Provider>,
+  )
+
+  fireEvent.change(getByTestId('name'), { target: { value: 'Ada' } })
+
+  expect(form.getField('name')?.getValue()).toBe('Ada')
+})
+```
+
+- **Renderer-agnostic.** Pair with `@testing-library/react`, Enzyme,
+  whatever — `Provider` is just a minimal React component.
+- **You own the lifetime.** The Provider does NOT destroy the form on
+  unmount, so your assertions work after the render root is torn down.
+  Call `form.destroy()` in teardown if you're leak-sensitive.
+- **Backed by `<FormContextProvider form={…}>`** — a new optional prop
+  on the main Provider that lets any caller hand in a pre-created
+  `Form` instance. Use it directly if you want a single Provider in
+  your test tree.
+
 ## Devtools
 
 A floating inspection panel is available as a subpath export. It reads

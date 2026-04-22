@@ -1,6 +1,6 @@
 {
   "name": "formular",
-  "version": "4.0.0-beta.2",
+  "version": "4.0.0-beta.3",
   "author": {
     "name": "Pavel Ivanov",
     "email": "grammka@gmail.com"
@@ -44,6 +44,11 @@
       "import": "./dist/devtools/index.js",
       "require": "./dist/devtools/index.cjs"
     },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js",
+      "require": "./dist/testing/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "engines": {
@@ -80,6 +85,11 @@
     {
       "name": "Devtools subpath (ESM, self-contained)",
       "path": "dist/devtools/index.js",
+      "limit": "5 kB"
+    },
+    {
+      "name": "Testing subpath (ESM, self-contained)",
+      "path": "dist/testing/index.js",
       "limit": "5 kB"
     }
   ],

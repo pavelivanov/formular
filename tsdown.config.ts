@@ -33,4 +33,17 @@ export default defineConfig([
     clean: false, // first pass already cleaned
     exports: false,
   },
+  {
+    name: 'testing',
+    entry: [ 'src/testing/index.ts' ],
+    outDir: 'dist/testing',
+    format: [ 'esm', 'cjs' ],
+    dts: true,
+    sourcemap: true,
+    platform: 'neutral',
+    target: 'es2019',
+    treeshake: true,
+    clean: false,
+    exports: false,
+  },
 ])
