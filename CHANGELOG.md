@@ -1,5 +1,40 @@
 # Changelog
 
+## 4.0.0-beta.2 — unreleased
+
+### Added
+
+- **`formular/devtools`** subpath export with a floating
+  `<FormularDevtools />` inspection panel. Three tabs: state (values,
+  errors, flags), fields (registered paths + per-field flags), events
+  (rolling log of every form event). Self-contained inline styles, no
+  portals, no global CSS, opt-in via explicit render. Props for
+  position, default open/tab, and an `enabled` kill-switch.
+- Shipping as a subpath export of the same package (not a separate
+  npm name) — single version, and tree-shakes out of the main bundle
+  when not imported. The devtools bundle weighs **3.1 KB brotli**;
+  main bundle is unchanged.
+- Integrated into `examples/vite-react` so you can poke at it via
+  `npm run dev`.
+
+### Changed
+
+- `tsdown.config.ts` switched from a single multi-entry build to two
+  independent build passes (`dist/index.js` + `dist/devtools/index.js`).
+  The multi-entry approach produced a shared chunk that every entry
+  had to load, inflating the main bundle for consumers that don't use
+  devtools. Two passes produce self-contained bundles — devtools pays
+  a small code-duplication cost, main bundle stays lean.
+
+### Bundle
+
+| Bundle | Limit (brotli) | Actual |
+|---|---|---|
+| ESM entry | 6.5 kB | 5.96 kB (unchanged) |
+| CJS entry | 7 kB   | 6.22 kB (unchanged) |
+| Tree-shaken core | 5 kB | 4.32 kB (unchanged) |
+| Devtools subpath | 5 kB | **3.12 kB (new)** |
+
 ## 4.0.0-beta.1
 
 First published release of the v4 line. The pre-release line under the

@@ -1,6 +1,6 @@
 {
   "name": "formular",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0-beta.2",
   "author": {
     "name": "Pavel Ivanov",
     "email": "grammka@gmail.com"
@@ -39,6 +39,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./devtools": {
+      "types": "./dist/devtools/index.d.ts",
+      "import": "./dist/devtools/index.js",
+      "require": "./dist/devtools/index.cjs"
+    },
     "./package.json": "./package.json"
   },
   "engines": {
@@ -70,6 +75,11 @@
       "name": "Tree-shaken core (Form + Provider + hooks)",
       "path": "dist/index.js",
       "import": "{ Form, useFieldRegister, useFormState, FormContextProvider }",
+      "limit": "5 kB"
+    },
+    {
+      "name": "Devtools subpath (ESM, self-contained)",
+      "path": "dist/devtools/index.js",
       "limit": "5 kB"
     }
   ],

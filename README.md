@@ -318,6 +318,47 @@ If you register a whole-object field (`useFieldRegister<T>('address')`),
 instead of descending. Mix granular and whole-object fields however suits
 your form.
 
+## Devtools
+
+A floating inspection panel is available as a subpath export. It reads
+the ambient form (or a specific one via the `form` prop) and shows live
+state, field list, and an event log.
+
+```tsx
+import { FormularDevtools } from 'formular/devtools'
+
+function Page() {
+  return (
+    <contact.FormContextProvider initialValues={…}>
+      {process.env.NODE_ENV !== 'production' && <FormularDevtools />}
+      <Form body />
+    </contact.FormContextProvider>
+  )
+}
+```
+
+The panel:
+
+- Collapses by default. Click the `formular` pill in the corner to
+  open.
+- Three tabs — **state** (values, errors, flags), **fields**
+  (registered paths + their state), **events** (rolling log of
+  `state change`, `change`, `field registered/renamed/unregistered`,
+  `submit`, `submit error`).
+- Self-contained (inline styles only; no global CSS, no portals).
+- Tree-shakes out when not imported — the main bundle doesn't pay.
+  Current cost when you do import it: **3.1 KB brotli** as a
+  self-contained subpath.
+
+**Render it first** inside your provider so its `useEffect` subscribes
+to form events before siblings register fields — otherwise the event
+tab starts empty.
+
+Props: `form?` (override ambient form), `position?` ('bottom-right' |
+'bottom-left' | 'top-right' | 'top-left'), `defaultOpen?`,
+`defaultTab?` ('state' | 'fields' | 'events'), `enabled?` (default
+`true` — flip to `false` or gate on `NODE_ENV` for production).
+
 ## Dynamic & conditional fields
 
 Fields register when their component mounts and unregister on unmount.

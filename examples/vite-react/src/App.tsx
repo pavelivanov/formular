@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { z } from 'zod'
 
 import { FieldError, FieldLabel, createForm, useFieldRegister } from 'formular'
+import { FormularDevtools } from 'formular/devtools'
 
 // Form shape — drives the typing of every form.useFieldRegister /
 // form.useFieldArray call below. Paths are checked against this.
@@ -75,6 +76,9 @@ export function App() {
           setLastResult({ values, errors: null, isValid: true })
         }}
       >
+        {/* Render devtools first so it subscribes in time to catch
+            the initial field-registration events. */}
+        <FormularDevtools />
         <ContactFormBody
           onSubmitError={(errors, values, isValid) =>
             setLastResult({ values, errors, isValid })
